@@ -1,4 +1,4 @@
-# Call as make [sam=shark,...] [system=ems,ism49,hyades,...] [mode=standard,dev]
+# Call as make [sam=shark,...] [system=zeus,ism49,hyades,...] [mode=standard,dev]
 
 # sam = galaxy formation model; each model requires custom modules "module_user_routines_[sam].f03" and "module_user_selection_[sam].f95"
 # system = computing system on which stingray is complied and executed
@@ -9,7 +9,7 @@ ifndef sam
 endif
 
 ifndef system
-   system = ems
+   system = zeus
 endif
 
 ifdef mode
@@ -34,6 +34,9 @@ ifeq ($(system),ism49) # private backup laptop of developer Obreschkow
 endif
 ifeq ($(system),hyades) # in-house cluster at ICRAR/UWA
    hdfflags = -I/opt/bldr/local/storage/hdf5/1.10.2/include -L/opt/bldr/local/storage/hdf5/1.10.2/lib -lhdf5_fortran -lhdf5
+endif
+ifeq ($(system),zeus) # in-house cluster at ICRAR/UWA
+   hdfflags = -I/pawsey/sles12sp3/devel/sandybridge/gcc/7.2.0/hdf5/1.10.1/include -L/pawsey/sles12sp3/devel/sandybridge/gcc/7.2.0/hdf5/1.10.1/lib -lhdf5_fortran -lhdf5
 endif
 ifeq ($(hdfflags),empty)
    $(info ERROR unknown system: '${system}')

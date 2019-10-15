@@ -52,32 +52,41 @@ character(len=255),parameter  :: parameter_filename_default = &
 
 type type_sam
 
-   integer*4   :: id_galaxy      ! unique galaxy ID
-   integer*8   :: id_halo        ! unique ID of parent halo
-   integer*4   :: snapshot       ! snapshot ID
-   integer*4   :: subvolume      ! subvolume index
-   integer*4   :: typ            ! galaxy type (0=central, 1=satellite in halo, 2=orphan)
-   real*4      :: position(3)    ! [Mpc/h] position of galaxy centre in simulation box
-   real*4      :: velocity(3)    ! [proper km/s] peculiar velocity
-   real*4      :: J(3)           ! [proper Msun/h pMpc/h km/s] angular momentum
-   real*4      :: mstars_disk    ! [Msun/h] stellar mass disk
-   real*4      :: mstars_bulge   ! [Msun/h] stellar mass bulge
-   real*4      :: mgas_disk      ! [Msun/h] gas mass disk
-   real*4      :: mgas_bulge     ! [Msun/h] gas mass bulge
-   real*4      :: matom_disk     ! [Msun/h] atomic gas mass disk
-   real*4      :: matom_bulge    ! [Msun/h] atomic gas mass bulge
-   real*4      :: mmol_disk      ! [Msun/h] molecular gas mass disk
-   real*4      :: mmol_bulge     ! [Msun/h] molecular gas mass bulge
-   real*4      :: rstar_disk     ! [cMpc/h] half-mass radius of stars in the disk
-   real*4      :: rstar_bulge    ! [cMpc/h] half-mass radius of stars in the bulge
-   real*4      :: rgas_disk      ! [cMpc/h] half-mass radius of gas in the disk
-   real*4      :: rgas_bulge     ! [cMpc/h] half-mass radius of gas in the bulge
-   real*4      :: mvir_hosthalo  ! [Msun/h]
-   real*4      :: mvir_subhalo   ! [Msun/h]
-   real*4      :: cnfw_subhalo   ! [-] concentration of NFW fit to subhalo
-   real*4      :: vvir_hosthalo  ! [km/s]	virial velocity of hosthalo
-   real*4      :: vvir_subhalo   ! [km/s]	virial velocity of subhalo
-   real*4      :: vmax_subhalo   ! [km/s]	maximum circular velocity of subhalo
+   integer*4   :: id_galaxy         ! unique galaxy ID
+   integer*8   :: id_halo           ! unique ID of parent halo
+   integer*4   :: snapshot          ! snapshot ID
+   integer*4   :: subvolume         ! subvolume index
+   integer*4   :: typ               ! galaxy type (0=central, 1=satellite in halo, 2=orphan)
+   real*4      :: position(3)       ! [Mpc/h] position of galaxy centre in simulation box
+   real*4      :: velocity(3)       ! [proper km/s] peculiar velocity
+   real*4      :: J(3)              ! [proper Msun/h pMpc/h km/s] angular momentum
+   real*4      :: mstars_disk       ! [Msun/h] stellar mass disk
+   real*4      :: mstars_bulge      ! [Msun/h] stellar mass bulge
+   real*4      :: mgas_disk         ! [Msun/h] gas mass disk
+   real*4      :: mgas_bulge        ! [Msun/h] gas mass bulge
+   real*4      :: matom_disk        ! [Msun/h] atomic gas mass disk
+   real*4      :: matom_bulge       ! [Msun/h] atomic gas mass bulge
+   real*4      :: mmol_disk         ! [Msun/h] molecular gas mass disk
+   real*4      :: mmol_bulge        ! [Msun/h] molecular gas mass bulge
+   real*4      :: rstar_disk        ! [cMpc/h] half-mass radius of stars in the disk
+   real*4      :: rstar_bulge       ! [cMpc/h] half-mass radius of stars in the bulge
+   real*4      :: rgas_disk         ! [cMpc/h] half-mass radius of gas in the disk
+   real*4      :: rgas_bulge        ! [cMpc/h] half-mass radius of gas in the bulge
+   real*4      :: sfr_disk          ! [Msun/Gyr/h] star formation rate disk
+   real*4      :: sfr_burst         ! [Msun/Gyr/h] star formation rate bulge
+   real*4      :: mgas_metals_bulge ! [Msun/h] metal gas mass bulge
+   real*4      :: mgas_metals_disk  ! [Msun/h] metal gas mass disk
+   real*4      :: zgas_disk         ! metallicity of the gas in the disk
+   real*4      :: zgas_bulge        ! metallicity of the gas in the bulge
+   real*4      :: mbh               ! [Msun/h] black hole mass
+   real*4      :: mbh_acc_hh        ! [Msun/Gyr/h] accretion rate in hot-halo mode
+   real*4      :: mbh_acc_sb        ! [Msun/Gyr/h] accretion rate in starburst mode
+   real*4      :: mvir_hosthalo     ! [Msun/h]
+   real*4      :: mvir_subhalo      ! [Msun/h]
+   real*4      :: cnfw_subhalo      ! [-] concentration of NFW fit to subhalo
+   real*4      :: vvir_hosthalo     ! [km/s] virial velocity of hosthalo
+   real*4      :: vvir_subhalo      ! [km/s] virial velocity of subhalo
+   real*4      :: vmax_subhalo      ! [km/s] maximum circular velocity of subhalo
    
 contains
 
@@ -153,6 +162,14 @@ type,extends(type_sky) :: type_sky_galaxy ! must exist
    real*4      :: vvir_subhalo            ! [km/s]	virial velocity of subhalo
    real*4      :: vmax_subhalo            ! [km/s]	maximum circular velocity of subhalo
    real*4      :: cnfw_subhalo            ! [-] concentration of NFW fit to subhalo
+   
+   real*4      :: zgas_disk               ! metallicity of the gas in the disk
+   real*4      :: zgas_bulge              ! metallicity of the gas in the disk
+   real*4      :: sfr                     ! [Msun/Gyr/h] star formation rate
+   
+   real*4      :: mbh            ! [Msun/h] black hole mass
+   real*4      :: mbh_acc_hh     ! [Msun/Gyr/h] accretion rate in hot-halo mode
+   real*4      :: mbh_acc_sb     ! [Msun/Gyr/h] accretion rate in starburst mode
    
    ! HI line
    real*4      :: hiline_flux_int         ! [W/m^2] integrated HI line flux
@@ -327,6 +344,21 @@ subroutine make_sky_galaxy(sky_galaxy,sam,base,groupid,galaxyid)
    sky_galaxy%matom_bulge     = sam%matom_bulge
    sky_galaxy%mmol_disk       = sam%mmol_disk
    sky_galaxy%mmol_bulge      = sam%mmol_bulge
+   sky_galaxy%sfr             = sam%sfr_disk + sam%sfr_burst
+   sky_galaxy%mbh             = sam%mbh
+   sky_galaxy%mbh_acc_sb      = sam%mbh_acc_sb
+   sky_galaxy%mbh_acc_hh      = sam%mbh_acc_hh
+   
+   if(sam%mgas_disk > 0) then 
+      sky_galaxy%zgas_disk   = sam%mgas_metals_disk / sam%mgas_disk
+   else 
+      sky_galaxy%zgas_disk   = 0
+   end if 
+   if(sam%mgas_bulge > 0) then 
+      sky_galaxy%zgas_bulge  = sam%mgas_metals_bulge/ sam%mgas_bulge
+   else 
+      sky_galaxy%zgas_bulge  = 0
+   end if
    
    ! intrinsic angular momentum
    pseudo_rotation   = tile(base%tile)%Rpseudo
@@ -338,7 +370,6 @@ subroutine make_sky_galaxy(sky_galaxy,sam,base,groupid,galaxyid)
    sky_galaxy%rgas_disk_intrinsic = sam%rgas_disk ! [cMpc/h]
    sky_galaxy%rgas_bulge_intrinsic = sam%rgas_bulge ! [cMpc/h]
    
-      
    ! APPARENT PROPERTIES
    
    ! inclination and position angle
@@ -674,6 +705,13 @@ subroutine load_sam_snapshot(index,subindex,sam)
    call hdf5_read_data(g//'rstar_bulge',sam%rstar_bulge)
    call hdf5_read_data(g//'rgas_disk',sam%rgas_disk)
    call hdf5_read_data(g//'rgas_bulge',sam%rgas_bulge)
+   call hdf5_read_data(g//'sfr_disk',sam%sfr_disk)
+   call hdf5_read_data(g//'sfr_burst',sam%sfr_burst)
+   call hdf5_read_data(g//'m_bh',sam%mbh)
+   call hdf5_read_data(g//'bh_accretion_rate_hh',sam%mbh_acc_hh)
+   call hdf5_read_data(g//'bh_accretion_rate_sb',sam%mbh_acc_sb)
+   call hdf5_read_data(g//'mgas_metals_disk',sam%mgas_metals_disk)
+   call hdf5_read_data(g//'mgas_metals_bulge',sam%mgas_metals_bulge)
    call hdf5_read_data(g//'mvir_hosthalo',sam%mvir_hosthalo)
    call hdf5_read_data(g//'mvir_subhalo',sam%mvir_subhalo)
    call hdf5_read_data(g//'cnfw_subhalo',sam%cnfw_subhalo)
@@ -868,6 +906,11 @@ subroutine make_hdf5
    call hdf5_write_data(trim(name)//'/matom_bulge',sky_galaxy%matom_bulge,'[Msun/h] atomic mass in the bulge')
    call hdf5_write_data(trim(name)//'/mmol_disk',sky_galaxy%mmol_disk,'[Msun/h] molecular gas mass in the disk')
    call hdf5_write_data(trim(name)//'/mmol_bulge',sky_galaxy%mmol_bulge,'[Msun/h] molecular gas mass in the bulge')
+   call hdf5_write_data(trim(name)//'/zgas_disk',sky_galaxy%zgas_disk,'metallicity of the gas in the disk')
+   call hdf5_write_data(trim(name)//'/zgas_bulge',sky_galaxy%zgas_bulge,'metallicity of the gas in the bulge')
+   call hdf5_write_data(trim(name)//'/mbh',sky_galaxy%mbh,'[Msun/h] black hole mass')
+   call hdf5_write_data(trim(name)//'/mbh_acc_hh',sky_galaxy%mbh_acc_hh,'[Msun/Gyr/h] black hole accretion rate in the hot halo mode')
+   call hdf5_write_data(trim(name)//'/mbh_acc_sb',sky_galaxy%mbh_acc_sb,'[Msun/Gyr/h] black hole accretion rate in the starburst mode')
    call hdf5_write_data(trim(name)//'/l_x',sky_galaxy%J(1),'[Msun pMpc km/s] x-component of total angular momentum')
    call hdf5_write_data(trim(name)//'/l_y',sky_galaxy%J(2),'[Msun pMpc km/s] y-component of total angular momentum')
    call hdf5_write_data(trim(name)//'/l_z',sky_galaxy%J(3),'[Msun pMpc km/s] z-component of total angular momentum')

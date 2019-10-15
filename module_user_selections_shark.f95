@@ -63,11 +63,11 @@ logical function sam_selection(sam) result(selected)
    
    select case (trim(para%survey))
    case ('test')
-      selected = (sam%mstars_disk>2e9)
+      selected = ((sam%mstars_disk+sam%mstars_bulge)>1e9)
    case ('devils')
-      selected = (sam%mstars_disk>1e8)
+      selected = ((sam%mstars_disk+sam%mstars_bulge)>1e7)
    case ('gama')
-      selected = (sam%mstars_disk>1e8)
+      selected = ((sam%mstars_disk+sam%mstars_bulge)>1e7)
    case ('alfalfa')
       selected = (sam%mgas_disk>1e6).or.((sam%matom_disk>1e6))
    case ('wallaby')
@@ -82,7 +82,7 @@ logical function sky_selection(sky,sam) result(selected)
 
    class(type_sky_galaxy),intent(in)   :: sky
    type(type_sam),intent(in)           :: sam
-   real*4,parameter                    :: dmag = 2.0
+   real*4,parameter                    :: dmag = 4.0
    
    call nil(sky,sam) ! dummy to avoid compiler warnings for unused arguments
    
