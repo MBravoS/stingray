@@ -166,7 +166,7 @@ type,extends(type_sky) :: type_sky_galaxy ! must exist
    real*4      :: zgas_disk               ! metallicity of the gas in the disk
    real*4      :: zgas_bulge              ! metallicity of the gas in the disk
    real*4      :: sfr_disk                ! [Msun/Gyr/h] star formation rate disk
-   real*4      :: sfr_bulge               ! [Msun/Gyr/h] star formation rate bulge
+   real*4      :: sfr_burst               ! [Msun/Gyr/h] star formation rate bulge
    
    real*4      :: mbh            ! [Msun/h] black hole mass
    real*4      :: mbh_acc_hh     ! [Msun/Gyr/h] accretion rate in hot-halo mode
@@ -346,7 +346,7 @@ subroutine make_sky_galaxy(sky_galaxy,sam,base,groupid,galaxyid)
    sky_galaxy%mmol_disk       = sam%mmol_disk
    sky_galaxy%mmol_bulge      = sam%mmol_bulge
    sky_galaxy%sfr_disk        = sam%sfr_disk
-   sky_galaxy%sfr_bulge       = sam%sfr_burst
+   sky_galaxy%sfr_burst       = sam%sfr_burst
    sky_galaxy%mbh             = sam%mbh
    sky_galaxy%mbh_acc_sb      = sam%mbh_acc_sb
    sky_galaxy%mbh_acc_hh      = sam%mbh_acc_hh
@@ -911,7 +911,7 @@ subroutine make_hdf5
    call hdf5_write_data(trim(name)//'/zgas_disk',sky_galaxy%zgas_disk,'metallicity of the gas in the disk')
    call hdf5_write_data(trim(name)//'/zgas_bulge',sky_galaxy%zgas_bulge,'metallicity of the gas in the bulge')
    call hdf5_write_data(trim(name)//'/sfr_disk',sky_galaxy%sfr_disk,'[Msun/Gyr/h] star formation rate disk')
-   call hdf5_write_data(trim(name)//'/sfr_bulge',sky_galaxy%sfr_bulge,'[Msun/Gyr/h] star formation rate bulge')
+   call hdf5_write_data(trim(name)//'/sfr_burst',sky_galaxy%sfr_burst,'[Msun/Gyr/h] star formation rate bulge')
    call hdf5_write_data(trim(name)//'/mbh',sky_galaxy%mbh,'[Msun/h] black hole mass')
    call hdf5_write_data(trim(name)//'/mbh_acc_hh',sky_galaxy%mbh_acc_hh,&
    &'[Msun/Gyr/h] black hole accretion rate in the hot halo regime')
