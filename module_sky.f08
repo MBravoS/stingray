@@ -219,7 +219,7 @@ function filename_sky_galaxies(isubvolume) result(fn)
    integer*4,intent(in) :: isubvolume
    character(255)       :: fn
    
-   fn = dir(para%path_output,fn_galaxies//'.'//val2str(isubvolume))
+   fn = dir(path_tmp,fn_galaxies//'.'//val2str(isubvolume))
 
 end function filename_sky_galaxies
 
@@ -229,7 +229,7 @@ function filename_sky_groups(isubvolume) result(fn)
    integer*4,intent(in) :: isubvolume
    character(255)       :: fn
    
-   fn = dir(para%path_output,fn_groups//'.'//val2str(isubvolume))
+   fn = dir(path_tmp,fn_groups//'.'//val2str(isubvolume))
 
 end function filename_sky_groups
 
@@ -667,14 +667,6 @@ subroutine write_sky_to_hdf5
       call write_hdf5_parameters(trim(filename))
       call write_hdf5_mapping(trim(filename))
       call write_hdf5(trim(filename),sky_galaxy,sky_group)
-      
-      ! delete binary files
-      do isubvolume = para%subvolume_min,para%subvolume_max
-         if (.not.para%keep_binaries) then
-            call system('rm '//filename_sky_galaxies(isubvolume))
-            if (para%make_groups) call system('rm '//filename_sky_groups(isubvolume))
-         end if
-      end do
    
    else
    
@@ -713,12 +705,6 @@ subroutine write_sky_to_hdf5
          ! free memory
          deallocate(sky_galaxy)
          deallocate(sky_group)
-         
-         ! delete binary files
-         if (.not.para%keep_binaries) then
-            call system('rm '//filename_sky_galaxies(isubvolume))
-            if (para%make_groups) call system('rm '//filename_sky_groups(isubvolume))
-         end if
       
       end do
       
@@ -753,6 +739,7 @@ subroutine initialize_hdf5(filename_hdf5,totstats,substats,isubvolume)
    name = 'run_info/'
    call hdf5_add_group(name)
    call hdf5_write_data(name//'stingray_version',version,'Version of Stingray used to produce this mock sky')
+   call hdf5_write_data(name//'stingray_timestamp',timestamp(),'Time at which this mockfile was written')
    
    ! write group "statistics"
    name = 'statistics/'

@@ -15,6 +15,7 @@ module module_parameters
    public   :: option
    public   :: devoption
    public   :: para
+   public   :: make_tmp_path
    
    private
    
@@ -84,7 +85,7 @@ module module_parameters
       
       ! I/O options
       logical*4            :: merge_output
-      logical*4            :: keep_binaries
+      logical*4            :: keep_tmp
       logical*4            :: keep_log
       
       ! derived parameters, not directly specified by the user (no default needed)
@@ -170,7 +171,7 @@ subroutine initialize_parameters
    call get_parameter_value(para%make_groups,'make_groups')
    call get_parameter_value(para%options,'options')
    call get_parameter_value(para%merge_output,'merge_output')
-   call get_parameter_value(para%keep_binaries,'keep_binaries')
+   call get_parameter_value(para%keep_tmp,'keep_tmp')
    call get_parameter_value(para%keep_log,'keep_log')
    call get_parameter_value(para%devoptions,'devoptions','')
    call require_no_parameters_left
@@ -358,6 +359,19 @@ logical function devoption(string)
    
 end function devoption
 
+subroutine make_tmp_path
+   
+   ! should be called before PRNG seed is initialised
+   
+   implicit none
+   real  :: x
+   call cpu_time(x)
+   write(path_tmp,'(A,A,I15,A)') trim(para%path_output),'tmp_', &
+   & int(mod(x,1.0)*1e10,8)+10000000000_8*get_random_integer(0,99999,.true.),'/'
+   call make_path(path_tmp)
+   
+end subroutine make_tmp_path
+
 subroutine write_hdf5_parameters(filename_hdf5)
 
    implicit none
@@ -426,9 +440,9 @@ subroutine write_hdf5_parameters(filename_hdf5)
    & 'specifies the number of search points (2^#)^3 inside each tile')
    call hdf5_write_data(name//'options',trim(para%options), &
    & 'string of options specifying what properties are generated')
-   call hdf5_write_data(name//'keep_binaries',para%keep_binaries, &
+   call hdf5_write_data(name//'keep_tmp',para%keep_tmp, &
    & 'logical flag specifying if binary output files are kept in additino to this HDF5 (0=false, 1=true)')
-   call hdf5_write_data(name//'keep_log',para%keep_binaries, &
+   call hdf5_write_data(name//'keep_log',para%keep_tmp, &
    & 'logical flag specifying if the logfile is kept after successful runs (0=false, 1=true)')
    if (.not.isempty(para%devoptions)) call hdf5_write_data(name//'devoptions',trim(para%devoptions), &
    & 'string of developer options')

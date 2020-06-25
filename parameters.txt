@@ -97,7 +97,7 @@ make_groups             y              logical flag specifying if groups are pro
 
 # Output file options
 merge_output            y              logical flag specifying whether the output file should be merged, or left split by subvolume
-keep_binaries           n              logical flag specifying if the binary output files are kept, if run was successful
+keep_tmp                n              logical flag specifying if the temporary binary output files are kept, if run was successful
 keep_log                y              logical flag specifying if the logfile is kept, if run was successful
 
 # Developer options
@@ -114,8 +114,8 @@ parameterset wallaby-micro-mac
 survey                  wallaby-micro
 path_input              /Users/do/Data/SURFS/L40_N512/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L40_N512/stingray/
-seed                    2
-filename_sky            mocksky_wallaby_micro_2
+seed                    1
+filename_sky            mocksky_wallaby_micro_1
 options                 luminosities,line_shapes
 end
 

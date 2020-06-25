@@ -15,7 +15,7 @@ program stingray
    implicit none
    
    ! start user interface
-   call set_version('0.34')
+   call set_version('0.35')
    call handle_arguments(require_task=.false.)
    call start_output
    
@@ -29,13 +29,15 @@ program stingray
    call initialize_parameters
    call set_cosmology('stingray',para%h,para%omega_m,para%omega_l)
    call assign_selection_function
+   call make_tmp_path
    
    ! main tasks
    call make_tiling
    call make_sky
    call write_sky_to_hdf5
    
-   ! finalize output on screen/logfile
+   ! finalize
+   call remove_path(path_tmp)
    call stop_output(delete_logfile=.not.para%keep_log)
     
 end program stingray

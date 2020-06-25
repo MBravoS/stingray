@@ -16,6 +16,7 @@ module module_global
    character(*),parameter  :: fn_tiles = 'tiles'
    character(*),parameter  :: fn_galaxies = 'galaxies'
    character(*),parameter  :: fn_groups = 'groups'
+   character(255)          :: path_tmp
    
    ! Limits
    type type_limit
