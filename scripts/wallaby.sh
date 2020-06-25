@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 #SBATCH --job-name=stingray
-#SBATCH --ntasks=6
-#SBATCH --time=48:00:00
+#SBATCH --ntasks=10
+#SBATCH --time=24:00:00
 #SBATCH --mem-per-cpu=16000
 
 module load gfortran/6.3.0 hdf5/1.10.2
