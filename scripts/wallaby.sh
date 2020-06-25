@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=stingray
-#SBATCH --ntasks=10
+#SBATCH --ntasks=5
 #SBATCH --time=24:00:00
 #SBATCH --mem-per-cpu=16000
 
