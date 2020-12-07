@@ -333,9 +333,17 @@ subroutine make_tile_list
                   ! random transformation
                   if (trim(para%randomisation)=='tiles') then
                      call assign_random_transformation(tile(itile)%transformation,.true.)
-                     if ((para%fix_observer_position).and.(i==0.and.j==0.and.k==0)) tile(itile)%transformation%translation = 0.0
+                     if ((para%fix_observer_position).and.(i==0.and.j==0.and.k==0)) then
+                        tile(itile)%transformation%translation = 0.0
+                        tile(itile)%transformation%inverted = .false.
+                     end if
                      if ((para%fix_observer_rotation).and.(i==0.and.j==0.and.k==0)) tile(itile)%transformation%rotation = 0.0
                   end if
+                  
+                  ! NB: for the other randomisation schemes ("single" and "shell"), the symmetry operations (translations,
+                  !     rotations and inversion) are specified at the level of the shell(s). See "make_shell_list" below.
+                  !     In this case the tile transformations will just be identities as specified in the definition
+                  !     of type_transformation (see module_global).
                
                end if
             end do
@@ -407,7 +415,7 @@ subroutine make_shell_list
          
       end if
       
-   else
+   else ! para%randomisation is either 'single' or 'tiles'
    
       allocate(shell(1))
       
@@ -415,14 +423,16 @@ subroutine make_shell_list
       shell(1)%dmin = fov%dc(1)
       shell(1)%dmax = fov%dc(2)
       
-      if ((trim(para%randomisation)=='single').or.(trim(para%randomisation)=='tiles')) &
-      & call assign_random_transformation(shell(1)%transformation,.false.)
+      call assign_random_transformation(shell(1)%transformation,.false.)
    
    end if
    
    if (shell(1)%dmin<0.5) then
    
-      if (para%fix_observer_position) shell(1)%transformation%translation = para%observer_translation
+      if (para%fix_observer_position) then
+         shell(1)%transformation%translation = para%observer_translation
+         shell(1)%transformation%inverted = .false.
+      end if
       if (para%fix_observer_rotation) shell(1)%transformation%rotation = para%observer_rotation
       
    end if

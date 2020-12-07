@@ -29,49 +29,43 @@ module module_global
       real*4      :: group_diameter_max = 0.25               ! [box side length] maximum allow group diameter
    end type type_limit
    
-   type type_spherical ! spherical coordinates
-   
+   ! Spherical coordinates
+   type type_spherical
       real*4   :: dc = 0.0    ! [simulation units/box lengths] comoving distance from observer
       real*4   :: ra = 0.0    ! [rad/deg] right ascension
       real*4   :: dec = 0.0   ! [rad/deg] declination
-   
    end type type_spherical
    
+   ! Field of view ranges
    type type_fov
-   
       real*4   :: dc(2)    ! [simulation units/box lengths] range of comoving distance from observer
       real*4   :: ra(2)    ! [deg/rad] range of right ascension
-      real*4   :: dec(2)   ! [deg/rad] range of declination
-      
+      real*4   :: dec(2)   ! [deg/rad] range of declination 
    end type type_fov
    
+   ! Standard indices for all sky objects
    type type_index
-      
       integer*8   :: galaxy = 0_8   ! unique galaxy index in mock sky (for groups: central galaxy or -1 if central not selected)
       integer*8   :: group = 0_8    ! unique group id in the mock sky (-1 for isolated galaxies)
       integer*4   :: tile = 0       ! tile index
       integer*4   :: shell = 0      ! shell index
       integer*4   :: snapshot = 0   ! snapshot index
       integer*4   :: subvolume = 0  ! subvolume index
-      
    end type type_index
    
+   ! Transformations of tiles and shells
    type type_transformation
-      
       real*4      :: translation(3) = (/0.0,0.0,0.0/) ! [box side length] translation vector [0...1]
       real*4      :: rotation(3,3)  = const%identity3 ! proper rotation matrix of tile/shell
       logical     :: inverted       = .false.         ! logical flag for axis inversion (0 = no inversion, 1 = all three axes inverted)
-      
    end type type_transformation
 
    type type_base
-   
       type(type_spherical)       :: spherical = type_spherical()           ! spherical coordinates (dc,ra,dec) [simulation length units, rad, rad]
       type(vector4)              :: cartesian = vector4()                  ! cartesian coordinates (x,y,z) [simulation length units]
       type(type_index)           :: index = type_index()                   ! various indices
       type(type_transformation)  :: transformation = type_transformation() ! comoving coordinate transformation from N-body box to sky
       real*4                     :: snapshot_redshift = 0.0                ! redshift of this snapshot, z=1/a-1
-      
    end type type_base
    
    type(type_limit),parameter          :: limit = type_limit()
