@@ -53,6 +53,9 @@ subroutine assign_selection_function
       case('deep-optical_narrow');  selection_function => selection_deep_optical_narrow
       case('wallaby-micro');        selection_function => selection_wallaby_micro
       case('wallaby-medi');         selection_function => selection_wallaby_medi
+      case('dsa-wide');             selection_function => selection_dsa_wide
+      case('dsa-pulsar');           selection_function => selection_dsa_pulsar
+      case('dsa-deep');             selection_function => selection_dsa_deep
    case default
       call selection_function_unknown
    end select   
@@ -396,6 +399,78 @@ subroutine selection_wallaby(dcmin,dcmax,pos,sam,sky,range,selected)
       n_channels = max(1.0,sky%hiline_shape%w50/wallaby_channel)
       noise = wallaby_noise_wm2*sqrt(n_channels*n_beams) ! [W/m^2] noise threshold level
       selected = sky%hiline_flux_int>noise*wallaby_sn .and. sky%zobs<=wallaby_zmax
+   end select
+   
+end subroutine
+
+! **********************************************************************************************************************************
+
+! Hypothetical DSA-2000 survey (for Fabian Walter)
+
+subroutine selection_dsa_wide(pos,sam,sky,range,selected)
+
+   implicit none
+   type(type_spherical),intent(in),optional     :: pos
+   type(type_sam),intent(in),optional           :: sam
+   type(type_sky_galaxy),intent(in),optional    :: sky
+   type(type_fov),intent(inout),optional        :: range
+   logical,intent(inout),optional               :: selected
+   
+   call selection_dsa(decmin=-30.00000,shimin=45e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 3pi survey
+
+end subroutine
+
+subroutine selection_dsa_pulsar(pos,sam,sky,range,selected)
+
+   implicit none
+   type(type_spherical),intent(in),optional     :: pos
+   type(type_sam),intent(in),optional           :: sam
+   type(type_sky_galaxy),intent(in),optional    :: sky
+   type(type_fov),intent(inout),optional        :: range
+   logical,intent(inout),optional               :: selected
+   
+   call selection_dsa(decmin=64.56022,shimin=18e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 2000 sqdeg
+
+end subroutine
+
+subroutine selection_dsa_deep(pos,sam,sky,range,selected)
+
+   implicit none
+   type(type_spherical),intent(in),optional     :: pos
+   type(type_sam),intent(in),optional           :: sam
+   type(type_sky_galaxy),intent(in),optional    :: sky
+   type(type_fov),intent(inout),optional        :: range
+   logical,intent(inout),optional               :: selected
+   
+   call selection_dsa(decmin=86.90943,shimin=9e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 30 sqdeg
+
+end subroutine
+
+subroutine selection_dsa(decmin,shimin,pos,sam,sky,range,selected)
+
+   implicit none
+   real*4,intent(in)                            :: decmin ! [deg] minimum declination
+   real*4,intent(in)                            :: shimin ! [Jy km/s] minimum HI flux
+   type(type_spherical),intent(in),optional     :: pos
+   type(type_sam),intent(in),optional           :: sam
+   type(type_sky_galaxy),intent(in),optional    :: sky
+   type(type_fov),intent(inout),optional        :: range
+   logical,intent(inout),optional               :: selected
+   
+   real*4   :: mhi            ! [Msun] HI mass, excluding helium
+   
+   select case (selection_type(pos,sam,sky,range,selected))
+   case (return_position_range)
+      range%dc = (/0.0,24.0/)
+      range%ra = (/0.0,360.0/)
+      range%dec = (/decmin,90.0/)
+   case (select_by_pos)
+   case (select_by_sam)
+   case (select_by_pos_and_sam)
+      mhi = (sam%matom_disk+sam%matom_bulge)/para%h/1.35 ! [Msun] HI mass
+      selected = mhi>2.35e5*(pos%dc/para%h)**2*shimin/2.1 ! rough preselection to accelerate computation (2.1 replaces 1+zobs)
+   case (select_by_all)
+      selected = sky%hiline_flux_int_vel>shimin .and. sky%zobs<=1.0
    end select
    
 end subroutine

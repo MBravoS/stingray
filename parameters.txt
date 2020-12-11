@@ -127,6 +127,60 @@ keep_log                y              logical flag specifying if the logfile is
 
 # PARAMETER SETS
 
+parameterset dsa-wide-mac
+survey                  dsa-wide
+path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
+seed                    1
+filename_sky            mocksky_dsa_wide_1
+options                 luminosities,line_shapes
+end
+
+parameterset dsa-pulsar-mac
+survey                  dsa-pulsar
+path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
+seed                    1
+filename_sky            mocksky_dsa_pulsar_1
+options                 luminosities,line_shapes
+end
+
+parameterset dsa-deep-mac
+survey                  dsa-deep
+path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
+seed                    1
+filename_sky            mocksky_dsa_deep_1
+options                 luminosities,line_shapes
+end
+
+parameterset dsa-wide-hyades
+survey                  dsa-wide
+path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /mnt/su3ctm/dobreschkow/stingray/
+seed                    1
+filename_sky            mocksky_dsa_wide_1
+options                 luminosities,line_shapes
+end
+
+parameterset dsa-pulsar-hyades
+survey                  dsa-pulsar
+path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /mnt/su3ctm/dobreschkow/stingray/
+seed                    1
+filename_sky            mocksky_dsa_pulsar_1
+options                 luminosities,line_shapes
+end
+
+parameterset dsa-deep-hyades
+survey                  dsa-deep
+path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
+path_output             /mnt/su3ctm/dobreschkow/stingray/
+seed                    1
+filename_sky            mocksky_dsa_deep_1
+options                 luminosities,line_shapes
+end
+
 parameterset wallaby-micro-mac
 survey                  wallaby-micro
 path_input              /Users/do/Data/SURFS/L40_N512/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
