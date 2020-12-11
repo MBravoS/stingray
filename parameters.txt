@@ -186,6 +186,7 @@ survey                  wallaby-micro
 path_input              /Users/do/Data/SURFS/L40_N512/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L40_N512/stingray/
 seed                    1
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_1
 options                 luminosities,line_shapes
 end
@@ -195,6 +196,7 @@ survey                  wallaby-medi
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
 seed                    1
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_1
 options                 luminosities,line_shapes
 end
@@ -204,6 +206,7 @@ survey                  wallaby-micro
 path_input              /mnt/su3ctm/clagos/SHARK_Out/micro-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    1
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_1
 options                 luminosities,line_shapes
 end
@@ -213,6 +216,7 @@ survey                  wallaby-medi
 path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    1
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_1
 options                 luminosities,line_shapes
 end
@@ -222,6 +226,7 @@ survey                  wallaby-micro
 path_input              /mnt/su3ctm/clagos/SHARK_Out/micro-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    2
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_2
 options                 luminosities,line_shapes
 end
@@ -231,6 +236,7 @@ survey                  wallaby-medi
 path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    2
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_2
 options                 luminosities,line_shapes
 end
@@ -240,6 +246,7 @@ survey                  wallaby-micro
 path_input              /mnt/su3ctm/clagos/SHARK_Out/micro-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    3
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_3
 options                 luminosities,line_shapes
 end
@@ -249,6 +256,7 @@ survey                  wallaby-medi
 path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    3
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_3
 options                 luminosities,line_shapes
 end
@@ -258,6 +266,7 @@ survey                  wallaby-micro
 path_input              /mnt/su3ctm/clagos/SHARK_Out/micro-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    4
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_4
 options                 luminosities,line_shapes
 end
@@ -267,6 +276,7 @@ survey                  wallaby-medi
 path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    4
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_4
 options                 luminosities,line_shapes
 end
@@ -276,6 +286,7 @@ survey                  wallaby-micro
 path_input              /mnt/su3ctm/clagos/SHARK_Out/micro-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    5
+randomisation           tiles
 filename_sky            mocksky_wallaby_micro_5
 options                 luminosities,line_shapes
 end
@@ -285,6 +296,7 @@ survey                  wallaby-medi
 path_input              /mnt/su3ctm/clagos/SHARK_Out/medi-SURFS/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /mnt/su3ctm/dobreschkow/stingray/
 seed                    5
+randomisation           tiles
 filename_sky            mocksky_wallaby_medi_5
 options                 luminosities,line_shapes
 end
