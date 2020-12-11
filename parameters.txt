@@ -64,7 +64,7 @@ omega_b                 auto           dimensionless energy density parameter of
 #   using the parameters "fix_observer_position" and "fix_observer_rotation".
 # Note that, in all cases, the tiling array is made in such away that the observer sits at the centre of a tile. This represents no
 # restriction, since translations of the tiling array can always be mimicked by translations of the structure within the tiles.
-randomisation           tiles          choose between "single", "tiles", "shells".
+randomisation           shells         choose between "single", "tiles", "shells".
 shell_tweaking          y              logical flag specifying if the shell radii can be slightly adjusted to match snapshot
 #                                      boundaries; only used if randomisation="shells"
 prng                    F77            type of pseudo-random number generator; choose "F77" or "F95". The GNU F77 PRNG generates a
