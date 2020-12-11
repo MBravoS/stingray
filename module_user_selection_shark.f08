@@ -461,7 +461,7 @@ subroutine selection_dsa(decmin,shimin,pos,sam,sky,range,selected)
    
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,24.0/)
+      range%dc = (/0.0,2400.0/)
       range%ra = (/0.0,360.0/)
       range%dec = (/decmin,90.0/)
    case (select_by_pos)
