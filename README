@@ -36,7 +36,7 @@ v0.33 20/05/2020: Minor bug fix in shared modules
 v0.34 21/06/2020: Corrected CO fluxes
 v0.35 25/06/2020: Temporary folder for processing, added stingray_timestamp to output
 v0.36 07/12/2020: Improved documentation
-v0.37 11/12/2020: Added DSA-2000 as examples in shark selection
+v0.37 11/12/2020: Fixed illegal tmp file names, added DSA-2000 as examples in shark selection
 
 Developed by Danail Obreschkow (danail.obreschkow@icrar.org)
 

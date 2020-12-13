@@ -51,13 +51,14 @@ subroutine make_sky
    type(type_sky_galaxy),allocatable   :: sky_galaxy(:)
    type(type_sky_group),allocatable    :: sky_group(:)
    character(255)                      :: strt = 'Thread 1/1'  ! default thread number, openmp not used
-   character(40)                       :: fmt
+   character(50)                       :: fmt
    character(255)                      :: str
    character(255)                      :: filename
+   character(10)                       :: progress
    type(type_task),allocatable         :: task(:)
    type(type_skystats),allocatable     :: substats(:) ! statistics of mock sky for particular subvolumes
    type(type_skystats)                 :: totstats    ! statistics of total mock sky
-   integer*4                           :: itask,n_tasks
+   integer*4                           :: itask,n_tasks,n_stamps,i_stamps
    
    call tic('POSITION OBJECTS INTO SKY AND MAKE APPARENT PROPERTIES')
    
@@ -65,10 +66,13 @@ subroutine make_sky
    n_tasks = (para%snapshot_max-para%snapshot_min+1)*(para%subvolume_max-para%subvolume_min+1)
    allocate(task(n_tasks))
    n_tasks = 0
+   n_stamps = 0
    do isnapshot = para%snapshot_min,para%snapshot_max
       if (snapshot(isnapshot)%n_tiles>0) then ! snapshot is used for at least some tiles
          do isubvolume = para%subvolume_min,para%subvolume_max
             n_tasks = n_tasks+1
+            if (n_stamps==huge(n_stamps)) call error('Number of stamps larger than largest integer.')
+            n_stamps = n_stamps+snapshot(isnapshot)%n_tiles
             task(n_tasks)%isnapshot = isnapshot
             task(n_tasks)%isubvolume = isubvolume
          end do
@@ -103,7 +107,9 @@ subroutine make_sky
    
    fmt = '(A,A,I0.'//val2str(ceiling(log10(para%snapshot_max+1.0)))//',A,I0.'//&
        & val2str(max(1,ceiling(log10(para%subvolume_max+1.0))))// &
-       & ',A,I0.'//val2str(ceiling(log10(size(tile)+1.0)))//',A,I0,A,I0,A)'
+       & ',A,I0.'//val2str(ceiling(log10(size(tile)+1.0)))//',A,A,A,I0,A,I0,A)'
+       
+   i_stamps = 0
    
    !$ call OMP_set_nested(.true.) ! enables nested parallelism
    
@@ -148,8 +154,11 @@ subroutine make_sky
                
                ! progress update, one thread at a time
                !$ write(strt,'(A,I0,A,I0)') 'Thread ',OMP_GET_THREAD_NUM()+1,'/',OMP_GET_NUM_THREADS()
+               i_stamps = i_stamps+1
+               write(progress,'(F7.3)') 100.0*real(i_stamps)/n_stamps
                write(str,fmt) trim(strt),': Place snapshot ',isnapshot,', subvolume ', &
-                  & isubvolume,' into tile ',itile,' (',size(sky_galaxy),'/',totstats%n_galaxies,' galaxies)'
+                  & isubvolume,' into tile ',itile,' (',trim(adjustl(progress)), &
+                  & '%, ',size(sky_galaxy),'/',totstats%n_galaxies,' galaxies)'
                call out(trim(str))
                
                ! save_sky_part, one thread at a time

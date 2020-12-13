@@ -366,7 +366,7 @@ subroutine make_tmp_path
    implicit none
    real  :: x
    call cpu_time(x)
-   write(path_tmp,'(A,A,I15,A)') trim(para%path_output),'tmp_', &
+   write(path_tmp,'(A,A,I0.15,A)') trim(para%path_output),'tmp_', &
    & int(mod(x,1.0)*1e10,8)+10000000000_8*get_random_integer(0,99999,.true.),'/'
    call make_path(path_tmp)
    
