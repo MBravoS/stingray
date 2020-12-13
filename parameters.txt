@@ -132,6 +132,7 @@ survey                  dsa-wide
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
 seed                    1
+randomisation           tiles
 filename_sky            mocksky_dsa_wide_1
 options                 luminosities,line_shapes
 end
@@ -141,6 +142,7 @@ survey                  dsa-pulsar
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
 seed                    1
+randomisation           shells
 filename_sky            mocksky_dsa_pulsar_1
 options                 luminosities,line_shapes
 end
@@ -150,6 +152,7 @@ survey                  dsa-deep
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
 path_output             /Users/do/Data/SURFS/L210_N1536/stingray/
 seed                    1
+randomisation           shells
 filename_sky            mocksky_dsa_deep_1
 options                 luminosities,line_shapes
 end
