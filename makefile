@@ -1,6 +1,6 @@
 # Call as make [sam=shark,...] [system=zeus,ism49,hyades,...] [mode=standard,dev]
 
-# sam = galaxy formation model; each model requires custom modules "module_user_routines_[sam].f03" and "module_user_selection_[sam].f95"
+# sam = galaxy formation model; each model requires custom modules "module_user_routines_[sam].f08" and "module_user_selection_[sam].f08"
 # system = computing system on which stingray is complied and executed
 # mode = compilation mode; allowed modes are 'standard' and 'dev'
 
@@ -12,17 +12,9 @@ ifndef system
    system = zeus
 endif
 
-ifdef mode
-   ifneq ($(mode),standard)
-      ifneq ($(mode),dev)
-         $(info ERROR unknown mode: '${mode}')
-stop
-      endif
-   endif
-else
+ifndef mode
    mode = standard
 endif
-
 
 # custom flags to load the HDF5 library
 hdfflags = empty
@@ -43,12 +35,18 @@ ifeq ($(hdfflags),empty)
 stop
 endif
 
-# make all compiler flags
+# standard compiler flags (depend on the "mode" option)
 ifeq ($(mode),standard)
-   FCFLAGS = -g $(hdfflags) -O3 -fopenmp
+   CFLAGS = -O3 -fopenmp -ffree-line-length-0
+else ifeq ($(mode),dev)
+   CFLAGS = -O0 -g -fbounds-check -fwhole-file -ffpe-trap=invalid,zero,overflow -Wall -Wunused -Wuninitialized -Wsurprising -Wconversion
 else
-   FCFLAGS = -g $(hdfflags) -O0 -fbounds-check -fwhole-file -ffpe-trap=invalid,zero,overflow -Wall -Wunused -Wuninitialized -Wsurprising -Wconversion
+   $(info ERROR unknown mode: '${mode}')
+stop
 endif
+
+# concatenate flags
+FCFLAGS =  $(CFLAGS) $(LFLAGS)
 
 # Compiler
 FC = gfortran
@@ -65,35 +63,41 @@ PROGRAMS = stingray
 # "make" builds all
 all: $(PROGRAMS)
 
-stingray.o:    module_constants.o \
-               module_types.o \
-               module_system.o \
-               module_io.o \
-               module_linalg.o \
-               module_cosmology.o \
-               module_sort.o \
+stingray.o:    shared_module_core.o \
+               shared_module_arguments.o \
+               shared_module_parameters.o \
+               shared_module_hdf5.o \
+               shared_module_cosmology.o \
+               shared_module_maths.o \
+               shared_module_vectors.o \
+               shared_module_constants.o \
+               shared_module_sort.o \
+               module_global.o \
+               module_parameters.o \
                module_conversion.o \
                module_emission_lines.o \
-               module_hdf5.o \
                module_user_routines_$(sam).o \
-               module_user_selections_$(sam).o \
-               module_parameters.o \
+               module_selection_tools.o \
+               module_user_selection_$(sam).o \
                module_tiling.o \
                module_sky.o
                
-stingray: 	   module_constants.o \
-               module_types.o \
-               module_system.o \
-               module_io.o \
-               module_linalg.o \
-               module_sort.o \
-               module_cosmology.o \
+stingray: 	   shared_module_core.o \
+               shared_module_arguments.o \
+               shared_module_parameters.o \
+               shared_module_hdf5.o \
+               shared_module_cosmology.o \
+               shared_module_maths.o \
+               shared_module_vectors.o \
+               shared_module_constants.o \
+               shared_module_sort.o \
+               module_global.o \
+               module_parameters.o \
                module_conversion.o \
                module_emission_lines.o \
-               module_hdf5.o \
                module_user_routines_$(sam).o \
-               module_user_selections_$(sam).o \
-               module_parameters.o \
+               module_selection_tools.o \
+               module_user_selection_$(sam).o \
                module_tiling.o \
                module_sky.o
 
@@ -118,6 +122,9 @@ stingray: 	   module_constants.o \
 
 %.o: %.f03
 	$(FC) $(FCFLAGS) -c $<
+	
+%.o: %.f08
+	$(FC) $(FCFLAGS) -c $<
 
 # Utility targets
 .PHONY: clean veryclean
@@ -127,3 +134,4 @@ clean:
 	rm -f *~ $(PROGRAMS)
 	rm -f fort.*
 	rm -rf *.dSYM
+	rm -rf example

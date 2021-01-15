@@ -2,28 +2,35 @@
    
 module module_conversion
 
-   use module_constants
-   use module_system
-   use module_linalg
-   use module_cosmology
+   use shared_module_core
+   use shared_module_cosmology
+   use shared_module_maths
+   use shared_module_vectors
+   use shared_module_constants
+   use module_global
+   use module_parameters
    
    public
-   
-   real*4   :: Rvector(3,3), Rpseudo(3,3) ! argument used by function rotate, defined as global variable to
-                                          ! avoid passing them through the use module
 
 contains
 
-function rotate(rotationmatrix,x) result(y)
+function rotate_vector(x,base,ispseudovector) result(y)
 
    implicit none
-   real*4,intent(in)    :: x(3)
-   real*4,intent(in)    :: rotationmatrix(3,3)
-   real*4               :: y(3)
+   real*4,intent(in)          :: x(3)        ! vector to be rotated
+   type(type_base),intent(in) :: base
+   logical,intent(in)         :: ispseudovector
+   real*4                     :: sgn
+   real*4                     :: y(3)
    
-   y = matmul(rotationmatrix,x)
+   if (ispseudovector) then
+      sgn = 1
+   else
+      sgn = 1-2*log2int(base%transformation%inverted)
+   end if
+   y = sgn*matmul(base%transformation%rotation,x)
    
-end function rotate
+end function rotate_vector
 
 subroutine make_redshift(x,v,zobs,zcmb,zcos)
 
@@ -47,8 +54,8 @@ subroutine make_redshift(x,v,zobs,zcmb,zcos)
    else   
       elos = x/dc ! unit-vector along the line of slight
       zcos_ = dc_to_redshift(dc)
-      zv1 = min(0.1,max(-0.1,sum(v*elos)/c*1e3)) ! limited to 0.1 to avoid relativistic regime, ok for all practical purposes
-      zv2 = min(0.1,max(-0.1,-sum(para%velocity_car*elos)/c*1e3)) ! limited to 0.1 to avoid relativistic regime, ok for all practical purposes
+      zv1 = min(0.1,max(-0.1,sum(v*elos)/const%c*1e3)) ! limited to 0.1 to avoid relativistic regime, ok for all practical purposes
+      zv2 = min(0.1,max(-0.1,-sum(para%velocity_car*elos)/const%c*1e3)) ! limited to 0.1 to avoid relativistic regime, ok for all practical purposes
       zcmb_ = (1+zcos_)*(1+zv1)-1 ! following Davis & Scrimgeour 2014
       zobs_ = (1+zcos_)*(1+zv1)*(1+zv2)-1 ! following Davis & Scrimgeour 2014
    end if
@@ -72,35 +79,29 @@ subroutine make_inclination_and_pa(x,J,inclination,pa)
    real*4                           :: eNorth(3)      ! unit vector pointing north (or south) (orthoconal to LOS)
    real*4                           :: eEast(3)       ! unit vector pointing east (or west) (orthoconal to LOS)
    real*4                           :: normx,normJ
-   real*4                           :: rand(2)
    
    normx = norm(x)
-   if (normx<=epsilon(normx)) call error('make_inclination_and_pa: norm of x is zero.')
    normJ = norm(J)
    
-   if (normJ<=epsilon(normJ)) then
+   if ((normx<=epsilon(normx)).or.(normJ<=epsilon(normJ))) then
       
       ! assign random inclination
-      call random_number(rand)
-      pa = rand(1)*2*pi
-      inclination = acos(rand(2))
+      pa = get_random_uniform_number(0.0,2.0*pi,modern=para%modern_prng)
+      inclination = acos(get_random_uniform_number(0.0,1.0,modern=para%modern_prng))
       
    else
    
-      eLOS = x/normx
-      eJ = J/normJ
+      eLOS = unitvector(x)
+      eJ = unitvector(J)
    
-      inclination = acos(sum(eLOS*eJ))
+      inclination = acos(min(1.0,max(-1.0,eLOS.dot.eJ)))
       if (inclination>pi/2.0) inclination = pi-inclination
    
-      eMajor = cross_product(eLOS,eJ)
-      eMajor = eMajor/norm(eMajor)
+      eMajor = unitvector(eLOS.cross.eJ)
+      eNorth = unitvector((/0,0,1/)-eLOS(3)*eLOS)
+      eEast = eNorth.cross.eLOS
    
-      eNorth = (/0,0,1/)-eLOS(3)*eLOS
-      eNorth = eNorth/norm(eNorth)
-      eEast = cross_product(eNorth,eLOS)
-   
-      pa = atan2(sum(eMajor*eEast),sum(eMajor*eNorth))
+      pa = atan2(eMajor.dot.eEast,eMajor.dot.eNorth)
       if (pa<0) pa = 2*pi+pa
       
    end if
@@ -151,7 +152,8 @@ function convert_luminosity2flux(L,dl) result(S)
    real*8,intent(in) :: L     ! [W] Luminosity
    real*4,intent(in) :: dl    ! [Mpc] luminosity distance
    real*8            :: S     ! [W/m^2] Integrated flux density
-
+   real*8,parameter  :: ASphereMpc = 1.1964952e+46_8 ! [m^2] surface area of a sphere with 1 Mpc radius (=4*pi*(Mpc/m)^2)
+   
    S = L/real(dl,8)**2/ASphereMpc
 
 end function convert_luminosity2flux
@@ -159,52 +161,13 @@ end function convert_luminosity2flux
 function convert_intflux2velintflux(S,lambda,z) result(S_V)
 
    implicit none
-   real*4,intent(in) :: S           ! [W/m^2] Integrated flux density
+   real*4,intent(in) :: S           ! [W/m^2] integrated flux density
    real*4,intent(in) :: lambda      ! [m] rest-frame wave length
    real*4,intent(in) :: z           ! [-] observed redshift
-   real*4            :: S_V         ! [Jy km/s] Velocity-integrated flux density
+   real*4            :: S_V         ! [Jy km/s] velocity-integrated flux density
    
    S_V = 1e23*S*lambda*(1+z)
 
 end function convert_intflux2velintflux
-
-function convert_vector(x,rotation) result(y)
-
-   implicit none
-   real*4,intent(in)    :: x(3)
-   integer*4,intent(in) :: rotation
-   real*4               :: y(3)
-
-   select case (abs(rotation))
-      case (1) ! identity
-         y = x
-      case(2) ! invert x-axis, while permuting y and z
-         y = (/-x(1),x(3),x(2)/)
-      case(3) ! invert y-axis, while permuting z and x
-         y = (/x(3),-x(2),x(1)/)
-      case(4) ! invert z-axis, while permuting x and y
-         y = (/x(2),x(1),-x(3)/)
-      case(5) ! permute (x,y,z) -> (y,z,x)
-         y = (/x(2),x(3),x(1)/)
-      case(6) ! permute (x,y,z) -> (z,x,y)
-         y = (/x(3),x(1),x(2)/)
-      case default
-         call error('Unknown rotation')
-   end select
-
-   if (rotation<0) y = -y ! inversion
-
-end function convert_vector
-
-function convert_pseudovector(x,rotation) result(y)
-
-   implicit none
-   real*4,intent(in)    :: x(3)
-   integer*4,intent(in) :: rotation
-   real*4               :: y(3)
-
-   y = convert_vector(x,abs(rotation))
-
-end function convert_pseudovector
 
 end module module_conversion

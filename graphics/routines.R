@@ -5,15 +5,6 @@ library(sphereplot)
 library(bit64)
 library(magicaxis)
 
-# constants
-degree = 180/pi
-pc = 3.0857e16
-kpc = 1e3*pc
-Mpc = 1e6*pc
-kms = 1e3
-Msun = 1.98855e30
-G = 6.67408e-11
-
 # routines
 rgl.new = function(windowSize = 700, bg = 'white') {
   open3d(windowRect=c(0,0,windowSize,windowSize))
@@ -28,21 +19,37 @@ rgl.hold = function() par3d(skipRedraw=TRUE)
 
 rgl.done = function() par3d(skipRedraw=FALSE)
 
-rgl.tiling = function(tile,rotationmatrix=diag(c(1,1,1)),zoom=1,col='grey') {
+rgl.tiling = function(tile,shell,zoom=1,col='grey') {
   par3d(skipRedraw=TRUE) # stop drawing
-  for (i in seq(length(tile$tile_id))) {
-    rgl.cube(tile$center_x[i],tile$center_y[i],tile$center_z[i],rotationmatrix,as.numeric(zoom),col=col)
+  for (itile in seq(length(tile$tile_id))) {
+    ishell = tile$shell[itile]
+    sxx = shell$transformation$rotation_xx[ishell]
+    sxy = shell$transformation$rotation_xy[ishell]
+    sxz = shell$transformation$rotation_xz[ishell]
+    syx = shell$transformation$rotation_yx[ishell]
+    syy = shell$transformation$rotation_yy[ishell]
+    syz = shell$transformation$rotation_yz[ishell]
+    szx = shell$transformation$rotation_zx[ishell]
+    szy = shell$transformation$rotation_zy[ishell]
+    szz = shell$transformation$rotation_zz[ishell]
+    rotationmatrix = rbind(c(sxx,sxy,sxz),c(syx,syy,syz),c(szx,szy,szz))
+    rgl.cube(tile$center_x[itile],tile$center_y[itile],tile$center_z[itile],rotationmatrix,as.numeric(zoom),col=col)
   }
-  par3d(skipRedraw=FALSE) # draw noe
+  par3d(skipRedraw=FALSE) # draw now
+}
+
+rgl.shells = function(shell,zoom=1) {
+  par3d(skipRedraw=TRUE) # stop drawing
+  if (shell$dc_min[1]>0) rgl.sphere(0,0,0, radius = shell$dc_min[1]*as.numeric(zoom))
+  for (i in seq_along(shell$shell_id)) {
+    rgl.sphere(0,0,0, radius = as.numeric(shell$dc_max[i])*as.numeric(zoom),col='#000000',alpha=0.05)
+  }
+  par3d(skipRedraw=FALSE) # draw now
 }
 
 rgl.cube = function(x,y,z,rotationmatrix=diag(c(1,1,1)),zoom=1,col='grey') {
-  rot.lines3d(x+c(0.5,0.5,-0.5,-0.5,0.5),
-          y+c(0.5,-0.5,-0.5,0.5,0.5),
-          z+c(0.5,0.5,0.5,0.5,0.5),rotationmatrix,zoom,col=col)
-  rot.lines3d(x+c(0.5,0.5,-0.5,-0.5,0.5),
-          y+c(0.5,-0.5,-0.5,0.5,0.5),
-          z-c(0.5,0.5,0.5,0.5,0.5),rotationmatrix,zoom,col=col)
+  rot.lines3d(x+c(0.5,0.5,-0.5,-0.5,0.5),y+c(0.5,-0.5,-0.5,0.5,0.5),z+c(0.5,0.5,0.5,0.5,0.5),rotationmatrix,zoom,col=col)
+  rot.lines3d(x+c(0.5,0.5,-0.5,-0.5,0.5),y+c(0.5,-0.5,-0.5,0.5,0.5),z-c(0.5,0.5,0.5,0.5,0.5),rotationmatrix,zoom,col=col)
   rot.lines3d(x+c(0.5,0.5),y+c(0.5,0.5),z+c(-0.5,0.5),rotationmatrix,zoom,col=col)
   rot.lines3d(x+c(0.5,0.5),y-c(0.5,0.5),z+c(-0.5,0.5),rotationmatrix,zoom,col=col)
   rot.lines3d(x-c(0.5,0.5),y+c(0.5,0.5),z+c(-0.5,0.5),rotationmatrix,zoom,col=col)
@@ -118,6 +125,23 @@ rgl.cone = function(para, nalpha = 20, nr = 20) {
   }
   
   par3d(skipRedraw=FALSE) # draw now
+}
+
+rgl.sphere <- function (x, y=NULL, z=NULL, ng=50, radius = 1, color="white", add=F, ...) {
+  lat <- matrix(seq(90, -90, len = ng)*pi/180, ng, ng, byrow = TRUE)
+  long <- matrix(seq(-180, 180, len = ng)*pi/180, ng, ng)
+  
+  vertex  <- rgl:::rgl.vertex(x, y, z)
+  nvertex <- rgl:::rgl.nvertex(vertex)
+  radius  <- rbind(vertex, rgl:::rgl.attr(radius, nvertex))[4,]
+  color  <- rbind(vertex, rgl:::rgl.attr(color, nvertex))[4,]
+  
+  for(i in 1:nvertex) {
+    x <- vertex[1,i] + radius[i]*cos(lat)*cos(long)
+    y <- vertex[2,i] + radius[i]*cos(lat)*sin(long)
+    z <- vertex[3,i] + radius[i]*sin(lat)
+    persp3d(x, y, z, specular="white", add=TRUE, color=color[i], ...)
+  }
 }
 
 vectProd <- function(x,y){

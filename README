@@ -1,7 +1,7 @@
 OVERVIEW
-====================================================================================================================
+=================================================================================================================================
 
-Stingray is a suite of Fortran routines to produce mock observing cones from semi-analytic models (SAMs).
+Stingray is a Fortran tool to produce mock observing cones from semi-analytic models (SAMs) of galaxy formation.
 
 V0.1  13/03/2018: First release
 V0.6  09/10/2018: Various bug fixes
@@ -15,21 +15,43 @@ V0.11 29/04/2019: Improved cosmology module, general clean up, improved makefile
 V0.12 12/09/2019: Bug fixes, developper version of HI-line module added
 V0.13 19/09/2019: Emission line maker for HI and CO with many rotation curve models for halos, disks and bulges
 v0.14 28/10/2019: Added pre_selection function to module_user_selections
+v0.15 04/02/2020: New entry "make_groups" in the parameter file, id_galaxy_sky changed and id_galaxy_sky_smart added,
+                  Included test data (shark subvolume L40_N512/199/0/)
+v0.16 25/02/2020: Input argument check fixed
+v0.17 01/03/2020: Changed id_galaxy_sky in shark user module to better cope with Viperfish
+v0.20 20/04/2020: Significant restructuring of the code, inclusion of shared modules
+v0.21 21/04/2020: Use of system-independent pseudo-random number generator
+v0.22 21/04/2020: Completely revised layout of module "module_user_selection"; only one function per survey needed
+v0.23 23/04/2020: Implementation of parameter sets; new parameter "options"; added CO lines to shark module
+v0.24 23/04/2020: Many additional galaxy properties, including all those added to stingray by Claudia Lagos
+v0.25 23/04/2020: All in Fortran 2008 standard
+v0.26 24/04/2020: Default parameterset via "parameterset*"
+v0.27 30/04/2020: Added module "shared_module_vectors", removed module "module_interface", minor fixes, comments
+v0.28 01/05/2020: New module "module_selection_tools" to simplify "module_user_selection_..."
+v0.29 04/05/2020: Parameter file with logical types, improved automatic parameter evaluation via set_auto_parameter routine
+v0.30 10/05/2020: New projection methods (see randomisation parameter)
+v0.31 11/05/2020: Various OOP improvements; packed relevant snapshot/tile/shell data into type_base for interfacing with user
+v0.32 18/05/2020: Updated makefile; optional developer parameters added
+v0.33 20/05/2020: Minor bug fix in shared modules
+v0.34 21/06/2020: Corrected CO fluxes
+v0.35 25/06/2020: Temporary folder for processing, added stingray_timestamp to output
+v0.36 07/12/2020: Improved documentation
+v0.37 11/12/2020: Fixed illegal tmp file names, added DSA-2000 as examples in shark selection
 
-Copyright Danail Obreschkow (danail.obreschkow@icrar.org)
+Developed by Danail Obreschkow (danail.obreschkow@icrar.org)
 
 
 GETTING STARTED
-====================================================================================================================
+=================================================================================================================================
 
 1) Installations:
-   a) make sure gfortran is installed (code tested for gfortran 4.4.7 and 5.0.0)
+   a) make sure gfortran is installed (code tested for GNU Fortran 9.3.0)
    b) make sure that HDF5 is installed (version 1.10.1 or higher)
 
 2) In terminal, download Stingray
    > git clone https://github.com/obreschkow/stingray
    
-3) Got to Stingray directory
+3) Go to stingray directory
    > cd stingray
    
 4) Clean potential previous compilations
@@ -44,38 +66,66 @@ GETTING STARTED
    > make system=[your system name]
    NB: depending on the system, it might be necessary to load fortran and hdf5 packages,
        e.g. using a command like
-       > module load gfortran/6.3.0 hdf5/1.10.2
-   NB: to activate all debugging flags and suppress multi-threading use
+       > module load gfortran hdf5
+   NB: to activate all debugging flags use
        > make mode=dev
+       
+7) Check stingray version
+   > ./stingray -v
+       
+8) Try to run the test-cone using the
+   > ./stingray
+   NB: This command assumes the default parameter file "parameters.txt" to be in the current directory.
+       Otherwise you must specify the path+filename of the parameter file using the option -parameterfile ...
+       
+The command above should produce a sky containing 500 galaxies in 486 groups. These data is written in the directory "example".
+
+To produce your own, custom-made mock sky,
+
+9) Edit the parameter file parameter.txt as required. (see explanations in default parameter file)
+
+10) Edit the selection function "module_user_selection_..." as required. (see explanations in the default module)
    
-7) Edit the parameter file parameter.txt, especially the input and output paths
+11) Produce mock observing cone
+    > ./stingray [-parameterfile .../parameter.txt] [-parameterset ...]
    
-8) Produce mock observing cone
-   > ./stingray [-parameterfile .../parameter.txt]
-   
-9) Check files written into output directory
-   
-10) Optionally, visualise the cone in R
+
+QUICK START ON ICRAR-HYADES
+=================================================================================================================================
+
+# To install and compile stingray in your home directory, copy the following lines into the hyades terminal:
+cd ~
+rm -rf stingray/ # remove previous surfsuite directory
+git clone https://github.com/obreschkow/stingray # install updated version
+cd stingray # change to surfsuite directory
+module load gfortran hdf5 # load required modules
+make system=hyades # compile code
+./stingray version # check version
+
+# To run a quick test execute the following line (still from within the stingray directory)
+# The sky should contain 500 galaxies in 486 groups. These data is written in the directory "example".
+./stingray
 
 
 ARGUMENTS
-====================================================================================================================
+=================================================================================================================================
 
 Generally, Stingray is called as
-> ./stingray routine [-option argument] [-option argument] ...
-
-The routines to choose from are
-+ make_tiling
-+ make_sky
-+ make_all = previous two together and additional routines, as specified in the user module
+> ./stingray [-option argument] [-option argument] ...
 
 Optional arguments:
 
 -parameterfile (default parameters.txt): path+filename of parameter-file
 
--verbose (default 1): logical flag (0 or 1) specifying whether the log should be displayed on the screen; this is normally turned off
- if run on a cluster with a queueing system
+-parameterset: if this option is specified, e.g. "-parameterset abc", the parameters listed in this parameterset, e.g. between
+ the lines "parameterset abc" and "end" overwrite the default parameters specified outside the parameterset. The user can mark
+ at most one parameterset in the parameterfile as the default parameterset using an asterix: "parameterset* abc". This
+ parameterset is taken as the default, if the option "-parameterset" is not provided. If no parameterset is marked as default
+ and if no parameterset is selected via "-parameterset", all parameters in parametersets are ignored.
+
+-logfile (default none) optional filename of an ascii-file for the screen output
+
+-verbose (default n if logfile given, otherwise y): logical flag (y or n) specifying whether the log should be
+ displayed on the screen
  
 -version: returns the version of Stingray
-
--help: points to README file
