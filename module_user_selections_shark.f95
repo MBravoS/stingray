@@ -42,6 +42,10 @@ logical function pos_selection(dc,ra,dec) result(selected)
       selected = ((ra>= 34.000).and.(ra<= 37.050).and.(dec>= -5.200).and.(dec<= -4.200)).or. &
                & ((ra>= 52.263).and.(ra<= 53.963).and.(dec>=-28.500).and.(dec<=-27.500)).or. &
                & ((ra>=149.380).and.(ra<=150.700).and.(dec>= +1.650).and.(dec<= +2.790))
+   case ('devils_deep')
+      selected = ((ra>= 34.000).and.(ra<= 37.050).and.(dec>= -5.200).and.(dec<= -4.200)).or. &
+               & ((ra>= 52.263).and.(ra<= 53.963).and.(dec>=-28.500).and.(dec<=-27.500)).or. &
+               & ((ra>=149.380).and.(ra<=150.700).and.(dec>= +1.650).and.(dec<= +2.790))
    case ('gama')
       selected = ((ra>= 30.200).and.(ra<= 38.800).and.(dec>=-10.250).and.(dec<= -3.720)).or. &
                & ((ra> 129.000).and.(ra<=141.000).and.(dec>= -2.000).and.(dec<= +3.000)).or. &
@@ -74,6 +78,8 @@ logical function sam_selection(sam) result(selected)
       selected = ((sam%mstars_disk+sam%mstars_bulge)>1e9)
    case ('devils')
       selected = ((sam%mstars_disk+sam%mstars_bulge)>1e7)
+   case ('devils_deep')
+      selected = ((sam%mstars_disk+sam%mstars_bulge)>1e6)
    case ('gama')
       selected = ((sam%mstars_disk+sam%mstars_bulge)>1e7)
    case ('alfalfa')
@@ -103,6 +109,8 @@ logical function pre_selection(sam,dc,ra,dec) result(selected)
    case ('test')
       selected = .true.
    case ('devils')
+      selected = .true.
+   case ('devils_deep')
       selected = .true.
    case ('gama')
       selected = .true.
@@ -134,6 +142,8 @@ logical function sky_selection(sky,sam) result(selected)
       selected = .true.
    case ('devils')
       selected = sky%mag<=21.2+dmag
+   case ('devils_deep')
+      selected = sky%mag<=26+dmag
    case ('gama')
       selected = ((sky%mag<=19.8+dmag).and.(sky%ra<330.0*degree)).or.(sky%mag<=19.2+dmag)
    case ('alfalfa')
