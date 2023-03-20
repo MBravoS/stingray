@@ -37,6 +37,7 @@ v0.34 21/06/2020: Corrected CO fluxes
 v0.35 25/06/2020: Temporary folder for processing, added stingray_timestamp to output
 v0.36 07/12/2020: Improved documentation
 v0.37 11/12/2020: Fixed illegal tmp file names, added DSA-2000 as examples in shark selection
+v0.38 18/08/2022: New way of assigning unique galaxy IDs to avoid duplicated indices for duplicated galaxies; bug fix with zobs
 
 Developed by Danail Obreschkow (danail.obreschkow@icrar.org)
 
@@ -78,7 +79,7 @@ GETTING STARTED
    NB: This command assumes the default parameter file "parameters.txt" to be in the current directory.
        Otherwise you must specify the path+filename of the parameter file using the option -parameterfile ...
        
-The command above should produce a sky containing 500 galaxies in 486 groups. These data is written in the directory "example".
+The command above should produce a sky containing 502 galaxies in 488 groups. These data is written in the directory "example".
 
 To produce your own, custom-made mock sky,
 

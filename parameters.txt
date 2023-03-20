@@ -113,7 +113,7 @@ options
 make_groups             y              logical flag specifying if groups are produced
 
 # Output file options
-merge_output            y              logical flag specifying whether the output file should be merged, or left split by subvolume
+merge_output            y              logical flag specifying whether the output file should be merged or left split by subvolume
 keep_tmp                n              logical flag specifying if the temporary binary output files are kept, if run was successful
 keep_log                y              logical flag specifying if the logfile is kept, if run was successful
 
@@ -135,6 +135,7 @@ seed                    1
 randomisation           tiles
 filename_sky            mocksky_dsa_wide_1
 options                 luminosities,line_shapes
+merge_output            n
 end
 
 parameterset dsa-pulsar-mac

@@ -34,6 +34,9 @@ module shared_module_core
    ! string handling
    public   :: isempty ! logical function checking if a string is empty
    public   :: replace_text ! replace all occurrences of a pattern in a string
+   public   :: lowercase ! turn a string into a lower case string
+   public   :: remove_tabs ! removes tabs from a string
+   public   :: tabs2spaces ! replaces all tabs by spaces in a character string
    public   :: timestamp ! character function returning the current date+time as a character string
    public   :: last_character ! function returning the last non-empty character of a string
    public   :: execname ! character function returning the name of the executable
@@ -47,9 +50,9 @@ module shared_module_core
    public   :: delete_file ! deletes a file, if the user has the rights to do so; other wise produce an error
    
    ! conversion functions
-   public   :: val2str  ! converts any numeric type into character string; do not call by multiple threads simultaneously
-   public   :: log2int  ! converts logical type into int*4 of value 0 or 1
-   public   :: int2log  ! converts an integer (0/1) into a logical*4, produces error message if not 0/1
+   public   :: val2str ! converts any numeric type into character string; do not call by multiple threads simultaneously
+   public   :: log2int ! converts logical type into int*4 of value 0 or 1
+   public   :: int2log ! converts an integer (0/1) into a logical*4, produces error message if not 0/1
    public   :: sec2time ! converts seconds into human-readable time string
    
    ! miscellaneous
@@ -76,7 +79,7 @@ module shared_module_core
    logical*4,protected           :: logfile_open = .false.
    integer*8,protected           :: time_start = -1
    integer*8,protected           :: time_tic = -1
-   character(*),parameter        :: hline_str = repeat('-',100)
+   character(*),parameter        :: hline_str = repeat('-',60)
    logical*4,protected           :: just_made_hline = .false.
    logical*4,protected           :: once_made_hline = .false.
    character(len=255),protected  :: version = '0.0'
@@ -374,6 +377,8 @@ end subroutine toc
 
 function val2str(value) result(str)
 
+   ! IMPORTANT: must be called without trim or adjust, e.g. use val2str(char), not val2str(trim(char))
+
    implicit none
    class(*),intent(in)        :: value ! value in any intrinsic numeric type, passed as unlimited polymorphic variable
    character(len=255)         :: txt
@@ -385,12 +390,12 @@ function val2str(value) result(str)
    type is (integer(kind=16));   write(txt,'(i0)') value
    type is (real(kind=4));       write(txt,'(1pg0)') value
    type is (real(kind=8));       write(txt,'(1pg0)') value
-   type is (real(kind=16));      write(txt,'(1pg0)') value
+   !type is (real(kind=16));      write(txt,'(1pg0)') value ! not supported by all compilers
    type is (logical);            write(txt,'(1l)') value
    type is (character(*));       write(txt,'(a)') value
    type is (complex(kind=4));    write(txt,'(1pg0,sp,1pg0,"i")') value
    type is (complex(kind=8));    write(txt,'(1pg0,sp,1pg0,"i")') value
-   type is (complex(kind=16));   write(txt,'(1pg0,sp,1pg0,"i")') value
+   !type is (complex(kind=16));   write(txt,'(1pg0,sp,1pg0,"i")') value ! not supported by all compilers
    class default
       call deverror('unknown variable type')
    end select
@@ -476,7 +481,7 @@ end function exists
 subroutine check_file(filename,permission)
 
    implicit none
-   character(*),intent(in)          :: filename ! path of file name
+   character(*),intent(in)          :: filename ! path or file name
    character(*),intent(in),optional :: permission ! requested permission, e.g, 'r', 'w', 'rw', 'rwx'
    integer*4                        :: status
    character(4)                     :: kind
@@ -522,6 +527,8 @@ subroutine remove_path(path)
 end subroutine remove_path
 
 function dir(s1,s2,s3,s4,s5,s6,s7,s8,s9,ispath) result(out)
+
+   ! IMPORTANT: must be called without trim or adjust, e.g. use dir(str1,str2), not dir(trim(str1),str2)
 
    implicit none
    class(*),intent(in)           :: s1
@@ -599,6 +606,46 @@ function replace_text (string,pattern,replacement)  result(out)
    end do
    
 end function replace_text
+
+function lowercase(str_in) result(str_out)
+
+   ! changes a strong to lower case
+
+   implicit none
+   character(*), intent(in) :: str_in
+   character(len(str_in))      :: str_out
+   integer :: ic, i
+
+   character(26), parameter :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+   character(26), parameter :: low = 'abcdefghijklmnopqrstuvwxyz'
+
+   str_out = str_in
+   do i = 1, len_trim(str_in)
+      ic = index(cap, str_in(i:i))
+      if (ic > 0) str_out(i:i) = low(ic:ic)
+   end do
+
+end function lowercase
+
+function remove_tabs(str) result(out)
+
+   implicit none
+   character(*),intent(in)    :: str      ! input string
+   character(:),allocatable   :: out
+   
+   out = replace_text(str,achar(9),'')
+
+end function remove_tabs
+
+function tabs2spaces(str) result(out)
+
+   implicit none
+   character(*),intent(in)    :: str      ! input string
+   character(:),allocatable   :: out
+   
+   out = replace_text(str,achar(9),' ')
+
+end function tabs2spaces
 
 character(1) function last_character(str)
 

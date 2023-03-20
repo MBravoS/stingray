@@ -192,6 +192,8 @@ subroutine read_parameters
       if (io/=0) exit
       if (.not.(isempty(line).or.(line(1:1)=='#'))) then
       
+         line = tabs2spaces(line)
+      
          read(line,*) name
          
          if (trim(name)=='end') then

@@ -416,7 +416,8 @@ subroutine selection_dsa_wide(pos,sam,sky,range,selected)
    type(type_fov),intent(inout),optional        :: range
    logical,intent(inout),optional               :: selected
    
-   call selection_dsa(decmin=-30.00000,shimin=45e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 3pi survey
+   !call selection_dsa(decmin=-30.00000,shimin=45e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 3pi survey (old)
+   call selection_dsa(decmin=-30.00000,shimin=5e-3,pos=pos,sam=sam,sky=sky,range=range,selected=selected) ! 3pi survey
 
 end subroutine
 

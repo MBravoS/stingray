@@ -58,7 +58,7 @@ subroutine make_sky
    type(type_task),allocatable         :: task(:)
    type(type_skystats),allocatable     :: substats(:) ! statistics of mock sky for particular subvolumes
    type(type_skystats)                 :: totstats    ! statistics of total mock sky
-   integer*4                           :: itask,n_tasks,n_stamps,i_stamps
+   integer*4                           :: itask,n_tasks,n_stamps,i_stamps,stamp_id
    
    call tic('POSITION OBJECTS INTO SKY AND MAKE APPARENT PROPERTIES')
    
@@ -131,14 +131,15 @@ subroutine make_sky
          allocate(sam_replica(size(sam)))
          sam_replica = 0
          
-         !$OMP PARALLEL PRIVATE(sam_replica_tile,sky_galaxy,sky_group,filename,str,strt)
+         !$OMP PARALLEL PRIVATE(sam_replica_tile,sky_galaxy,sky_group,filename,str,strt,stamp_id)
          !$OMP DO
          do itile = 1,size(tile)
             if ((snapshot(isnapshot)%dmax>=tile(itile)%dmin).and.(snapshot(isnapshot)%dmin<=tile(itile)%dmax)) then
          
                allocate(sam_replica_tile(size(sam)))
                sam_replica_tile = 0
-               call place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_replica_tile,sky_galaxy,sky_group)
+               stamp_id = size(tile)*itask+itile ! unique, independent of threading
+               call place_subvolume_into_tile(stamp_id,itile,isnapshot,isubvolume,sam,sam_sel,sam_replica_tile,sky_galaxy,sky_group)
                
                !$OMP CRITICAL 
                ! count objects, one thread at a time
@@ -342,13 +343,14 @@ subroutine preprocess_snapshot(sam,sam_sel)
    
 end subroutine preprocess_snapshot
 
-subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_replica,sky_galaxy_list,sky_group_list)
+subroutine place_subvolume_into_tile(stamp_index,itile,isnapshot,isubvolume,sam,sam_sel,sam_replica,sky_galaxy_list,sky_group_list)
 
    ! NB: most of this routine deals with groups
    ! if no make_groups==0, this routine essentially places all the galaxies in 'sam' into the sky,
    ! making sure to only retain the objects that pass the selection_function of the user module
 
    implicit none
+   integer*4,intent(in)                            :: stamp_index
    integer*4,intent(in)                            :: itile
    integer*4,intent(in)                            :: isnapshot
    integer*4,intent(in)                            :: isubvolume
@@ -406,7 +408,9 @@ subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_
    ishell = tile(itile)%shell
    n_galaxies = 0
    n_groups = 0
-   prefixid = int(limit%n_galaxies_per_tile_max,8)*(int(limit%n_subvolumes_max,8)*int(isnapshot,8)+int(isubvolume,8))
+   !prefixid = int(limit%n_galaxies_per_tile_max,8)*(int(limit%n_subvolumes_max,8)*int(isnapshot,8)+int(isubvolume,8)) ! up to v0.37
+   prefixid = int(limit%n_galaxies_per_tile_max,8)*int(stamp_index,8)
+   
    devoption_yzgrid = devoption('yzgrid')
    wrap_groups = trim(para%randomisation)=='tiles'
    

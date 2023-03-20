@@ -294,6 +294,13 @@ subroutine make_sky_object(sky_object,sam,base)
                                  ! logical      base%transformation%inverted flag that is true if the three axes have been inverted
    ! end required interface
    
+   real*4                        :: x(3)     ! [Mpc] position vector
+   real*4                        :: dc       ! [box side-length] comoving distance
+   real*4                        :: elos(3)  ! unit vector pointing along the line of sight
+   real*4                        :: vobs_r
+   
+   
+   
    call nil(sky_object,sam,base) ! dummy statement to avoid compiler warnings (do not edit)
    
    ! checks
@@ -308,18 +315,18 @@ subroutine make_sky_object(sky_object,sam,base)
    sky_object%id_group_sky  = base%index%group
    
    ! sky coordinates
-   sky_object%dc  = base%spherical%dc   ! [simulation length unit = Mpc/h]
+   sky_object%dc  = base%spherical%dc  ! [simulation length unit = Mpc/h]
    sky_object%ra  = base%spherical%ra  ! [rad]
    sky_object%dec = base%spherical%dec ! [rad]
-   
-   ! redshifts from the position and velocity of the object
-   call make_redshift(components(base%cartesian*(para%length_unit/unit%Mpc)), &
-   & sam%velocity,zobs=sky_object%zobs,zcmb=sky_object%zcmb,zcos=sky_object%zcos)
    
    ! peculiar velocity
    sky_object%vpec      = rotate_vector(sam%velocity,base,ispseudovector=.false.)
    sky_object%vpecrad   = sky_object%vpec.dot.unitvector(base%cartesian)
    
+   ! redshifts from the position and velocity of the object
+   call make_redshift(components(base%cartesian*(para%length_unit/unit%Mpc)), &
+   & sky_object%vpec,zobs=sky_object%zobs,zcmb=sky_object%zcmb,zcos=sky_object%zcos)
+      
 end subroutine make_sky_object
 
 ! The following subroutine makes all the galaxy properties specific to galaxies, i.e. not shared with groups.
@@ -415,7 +422,7 @@ subroutine make_sky_galaxy(sky_galaxy,sam,base)
    sky_galaxy%mag = convert_absmag2appmag(convert_stellarmass2absmag(mstars,1.0),dl)
       
    ! integrated 21cm flux
-   mHI = (sam%matom_disk+sam%matom_bulge)/1.35 ! [Msun/h] HI mass  
+   mHI = (sam%matom_disk+sam%matom_bulge)/1.35 ! [Msun/h] HI mass (without Helium)
    sky_galaxy%hiline_flux_int = real(convert_luminosity2flux(real(mHI/para%h,8)*real(L2MHI,8)*unit%Lsun,dl),4) ! [W/m^2]
    sky_galaxy%hiline_flux_int_vel = convert_intflux2velintflux(sky_galaxy%hiline_flux_int,0.21106114,sky_galaxy%zobs)
    
