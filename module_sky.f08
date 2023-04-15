@@ -1,4 +1,4 @@
-module module_sky
+gmodule module_sky
 
    use shared_module_core
    use shared_module_constants
@@ -295,7 +295,7 @@ subroutine preprocess_snapshot(sam,sam_sel)
       do i_group = 1,n_groups
       
          ! handle central galaxy
-         if (.not.sam(i)%is_group_center()) call error('each group must have exactly one central member.')
+         if (.not.sam(i)%is_group_center()) call error('each group must have a central member.')
          groupid = sam(i)%get_groupid() ! identical to sam(i)%get_groupid(), but faster
          
          ! count number of galaxies in group and number of selected galaxies in group
