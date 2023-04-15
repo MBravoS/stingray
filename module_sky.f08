@@ -1,4 +1,4 @@
-gmodule module_sky
+module module_sky
 
    use shared_module_core
    use shared_module_constants
