@@ -295,7 +295,7 @@ subroutine preprocess_snapshot(sam,sam_sel)
       do i_group = 1,n_groups
       
          ! handle central galaxy
-         if (.not.sam(i)%is_group_center())
+         if (.not.sam(i)%is_group_center()) then
             call out('halo ID: ',sam(i)%id_halo())
             call out('galaxy ID: ',sam(i)%id_galaxy())
             call out('subvolume: ',sam(i)%subvolume())
