@@ -296,11 +296,11 @@ subroutine preprocess_snapshot(sam,sam_sel)
       
          ! handle central galaxy
          if (.not.sam(i)%is_group_center()) then
-            call out('halo ID: ',sam(i)%id_halo())
-            call out('galaxy ID: ',sam(i)%id_galaxy())
-            call out('subvolume: ',sam(i)%subvolume())
-            call out('snapshot: ',sam(i)%snapshot())
-            call error('each group must have a central member.')
+            out('halo ID: ',sam(i)%id_halo())
+            out('galaxy ID: ',sam(i)%id_galaxy())
+            out('subvolume: ',sam(i)%subvolume())
+            out('snapshot: ',sam(i)%snapshot())
+            error('each group must have a central member.')
          end if
          groupid = sam(i)%get_groupid() ! identical to sam(i)%get_groupid(), but faster
          
