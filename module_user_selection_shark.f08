@@ -48,8 +48,6 @@ subroutine assign_selection_function
       case('example');              selection_function => selection_example
       case('gama');                 selection_function => selection_gama
       case('devils');               selection_function => selection_devils
-      case('waves-wide');           selection_function => selection_waves_wide
-      case('waves-deep');           selection_function => selection_waves_deep
    case default
       call selection_function_unknown
    end select   
