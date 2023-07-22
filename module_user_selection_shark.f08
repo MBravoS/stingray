@@ -158,9 +158,9 @@ subroutine selection_gama(pos,sam,sky,range,selected)
       mstars = (sam%mstars_disk+sam%mstars_bulge)/para%h ! [Msun]
       dl = pos%dc/para%h ! [Mph] comoving distance as an inferior limit for the luminosity distance, which would require sky%zobs
       mag = convert_absmag2appmag(convert_stellarmass2absmag(mstars,1.0),dl)
-      selected = (mag<=19.65+dmag)
+      selected = mag<=19.8+dmag
    case (select_by_all)
-      selected = sky%mag<=19.65+dmag
+      selected = sky%mag<=19.8+dmag
    end select
    
 end subroutine
