@@ -139,7 +139,7 @@ subroutine selection_gama(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,1750.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.7)
+      range%dc = (/0.0,1700.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.7)
       range%ra = (/129.0,351.0/)    ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-35.0,3.0/)     ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
@@ -148,7 +148,7 @@ subroutine selection_gama(pos,sam,sky,range,selected)
                & ((pos%ra>=211.5).and.(pos%ra<=223.5).and.(pos%dec>= -2.00).and.(pos%dec<= +3.00)).or. & ! field G15
                & ((pos%ra>=339.0).and.(pos%ra<=351.0).and.(pos%dec>=-35.00).and.(pos%dec<=-30.00))       ! field G23
    case (select_by_sam)
-      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
+      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e6
    case (select_by_pos_and_sam)
       ! note: The selection below is based on a rough estimate of a generic apparent magnitude mag.
       !       This same magnitude is computed later and stored in sky%mag, which is used onder 'selected_by_all'.
@@ -158,9 +158,9 @@ subroutine selection_gama(pos,sam,sky,range,selected)
       mstars = (sam%mstars_disk+sam%mstars_bulge)/para%h ! [Msun]
       dl = pos%dc/para%h ! [Mph] comoving distance as an inferior limit for the luminosity distance, which would require sky%zobs
       mag = convert_absmag2appmag(convert_stellarmass2absmag(mstars,1.0),dl)
-      selected = (mag<=19.65+dmag)
+      selected = mag<=19.8+dmag
    case (select_by_all)
-      selected = sky%mag<=19.65+dmag
+      selected = sky%mag<=19.8+dmag
    end select
    
 end subroutine
@@ -188,7 +188,7 @@ subroutine selection_devils(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,2600.00/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
+      range%dc = (/0.0,2350.00/) ! [simulation length units, here Mpc/h] distance range (to z~1.0)
       range%ra = (/34.0,150.70/) ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-28.5,2.79/) ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
@@ -196,93 +196,13 @@ subroutine selection_devils(pos,sam,sky,range,selected)
                & ((pos%ra>= 52.263).and.(pos%ra<= 53.963).and.(pos%dec>=-28.500).and.(pos%dec<=-27.500)).or. & ! D03 (ECDFS)
                & ((pos%ra>=149.380).and.(pos%ra<=150.700).and.(pos%dec>= +1.650).and.(pos%dec<= +2.790))       ! D10 (COSMOS)
    case (select_by_sam)
-      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
+      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e6
    case (select_by_pos_and_sam)
       ! note: see comments in selection_gama
       mag = convert_absmag2appmag(convert_stellarmass2absmag((sam%mstars_disk+sam%mstars_bulge)/para%h,1.0),pos%dc/para%h)
       selected = mag<=21.2+dmag
    case (select_by_all)
       selected = sky%mag<=21.2+dmag
-   end select
-   
-end subroutine
-
-! **********************************************************************************************************************************
-
-! WAVES-Wide survey
-
-subroutine selection_waves_wide(pos,sam,sky,range,selected)
-
-   implicit none
-   type(type_spherical),intent(in),optional     :: pos
-   type(type_sam),intent(in),optional           :: sam
-   type(type_sky_galaxy),intent(in),optional    :: sky
-   type(type_fov),intent(inout),optional        :: range
-   logical,intent(inout),optional               :: selected
-   
-   ! computation variables
-   real*4            :: mag ! rough estimate of a apparent magnitude assuming M/L=1
-   real*4,parameter  :: dmag = 4.0 ! magnitude tolerance
-   
-   ! selection function
-   select case (selection_type(pos,sam,sky,range,selected))
-   case (return_position_range)
-      range%dc = (/0.0,2600.0/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
-      range%ra = (/0.0,360.0/)  ! [deg] range of right ascensions, bound to 0 to 360
-      range%dec = (/-40.0,5.0/) ! [deg] range of declinations, bound to -90 to +90
-   case (select_by_pos)
-      selected = ((pos%ra>= 157.000).and.(pos%ra<= 225.000).and.(pos%dec>= -3.000).and.(pos%dec<=  4.000)).or. & ! WWN
-               & ((pos%ra>=   0.000).and.(pos%ra<=  52.500).and.(pos%dec>=-35.900).and.(pos%dec<=-27.000)).or. & ! WWS (East)
-               & ((pos%ra>= 330.000).and.(pos%ra<  360.000).and.(pos%dec>=-35.900).and.(pos%dec<=-27.000))       ! WWS (West)
-   case (select_by_sam)
-      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
-   case (select_by_pos_and_sam)
-      ! note: see comments in selection_gama
-      mag = convert_absmag2appmag(convert_stellarmass2absmag((sam%mstars_disk+sam%mstars_bulge)/para%h,1.0),pos%dc/para%h)
-      selected = mag<=21.1+dmag
-   case (select_by_all)
-      selected = sky%mag<=21.1+dmag
-   end select
-   
-end subroutine
-
-! **********************************************************************************************************************************
-
-! WAVES-Deep survey
-
-subroutine selection_waves_deep(pos,sam,sky,range,selected)
-
-   implicit none
-   type(type_spherical),intent(in),optional     :: pos
-   type(type_sam),intent(in),optional           :: sam
-   type(type_sky_galaxy),intent(in),optional    :: sky
-   type(type_fov),intent(inout),optional        :: range
-   logical,intent(inout),optional               :: selected
-   
-   ! computation variables
-   real*4            :: mag ! rough estimate of a apparent magnitude assuming M/L=1
-   real*4,parameter  :: dmag = 4.0 ! magnitude tolerance
-   
-   ! selection function
-   select case (selection_type(pos,sam,sky,range,selected))
-   case (return_position_range)
-      range%dc = (/0.0,1100.0/) ! [simulation length units, here Mpc/h] distance range (to z~0.4)
-      range%ra = (/-21.0,151.12/) ! [deg] range of right ascensions, bound to 0 to 360
-      range%dec = (/-44.7,3.5/) ! [deg] range of declinations, bound to -90 to +90
-   case (select_by_pos)
-      selected = ((pos%ra>=339.00).and.(pos%ra<=351.00).and.(pos%dec>=-35.00).and.(pos%dec<=-30.00)).or. & ! G23
-               & ((pos%ra>=  7.95).and.(pos%ra<=  9.95).and.(pos%dec>=-44.70).and.(pos%dec<=-42.70)).or. & ! ELAIS-S
-               & ((pos%ra>= 34.50).and.(pos%ra<= 36.50).and.(pos%dec>= -6.55).and.(pos%dec<= -4.55)).or. & ! XMM-LSS
-               & ((pos%ra>= 52.00).and.(pos%ra<= 54.00).and.(pos%dec>=-29.00).and.(pos%dec<=-27.00)).or. & ! eCDFS
-               & ((pos%ra>=149.12).and.(pos%ra<=151.12).and.(pos%dec>=  1.50).and.(pos%dec<=  3.50))       ! eCOSMOS
-   case (select_by_sam)
-      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
-   case (select_by_pos_and_sam)
-      ! note: see comments in selection_gama
-      mag = convert_absmag2appmag(convert_stellarmass2absmag((sam%mstars_disk+sam%mstars_bulge)/para%h,1.0),pos%dc/para%h)
-      selected = mag<=24.0+dmag
-   case (select_by_all)
-      selected = sky%mag<=24.0+dmag
    end select
    
 end subroutine
