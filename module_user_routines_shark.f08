@@ -648,7 +648,7 @@ subroutine make_auto_parameters
    call set_auto_parameter('subvolume_min',0)
    
    ! find minimal snapshot, assuming that the first subvolume exists
-   isnapshot = 50
+   isnapshot = 55
    do while (.not.exists(filename_sam(isnapshot,0,1)).and.(isnapshot<limit%n_snapshots_max))
       isnapshot = isnapshot+1
    end do
