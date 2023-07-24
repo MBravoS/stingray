@@ -111,18 +111,12 @@ subroutine make_sky
        
    i_stamps = 0
    
-   !$ call OMP_set_nested(.true.) ! enables nested parallelism
-   
-   !$OMP PARALLEL PRIVATE(isnapshot,isubvolume,itile,sam,sam_sel,sam_replica)
-   !$OMP DO
    do itask = 1,n_tasks
    
       isnapshot = task(itask)%isnapshot
       isubvolume = task(itask)%isubvolume
    
-      !$OMP CRITICAL ! load snapshot, one thread at a time
       call load_sam_snapshot(isnapshot,isubvolume,sam)
-      !$OMP END CRITICAL
          
       call preprocess_snapshot(sam,sam_sel)
          
@@ -131,8 +125,6 @@ subroutine make_sky
          allocate(sam_replica(size(sam)))
          sam_replica = 0
          
-         !$OMP PARALLEL PRIVATE(sam_replica_tile,sky_galaxy,sky_group,filename,str,strt,stamp_id)
-         !$OMP DO
          do itile = 1,size(tile)
             if ((snapshot(isnapshot)%dmax>=tile(itile)%dmin).and.(snapshot(isnapshot)%dmin<=tile(itile)%dmax)) then
          
@@ -141,7 +133,6 @@ subroutine make_sky
                stamp_id = size(tile)*itask+itile ! unique, independent of threading
                call place_subvolume_into_tile(stamp_id,itile,isnapshot,isubvolume,sam,sam_sel,sam_replica_tile,sky_galaxy,sky_group)
                
-               !$OMP CRITICAL 
                ! count objects, one thread at a time
                sam_replica = sam_replica+sam_replica_tile
                deallocate(sam_replica_tile)
@@ -154,7 +145,6 @@ subroutine make_sky
                &call error('Number of galaxies in the sky exceeds ',limit%n_galaxies_sky_max)
                
                ! progress update, one thread at a time
-               !$ write(strt,'(A,I0,A,I0)') 'Thread ',OMP_GET_THREAD_NUM()+1,'/',OMP_GET_NUM_THREADS()
                i_stamps = i_stamps+1
                write(progress,'(F7.3)') 100.0*real(i_stamps)/n_stamps
                write(str,fmt) trim(strt),': Place snapshot ',isnapshot,', subvolume ', &
@@ -173,25 +163,18 @@ subroutine make_sky
                   write(fid) sky_group
                   close(fid)
                end if
-               !$OMP END CRITICAL
               
             end if
          end do
-         !$OMP END DO
-         !$OMP END PARALLEL
          
-         !$OMP CRITICAL 
          substats(isubvolume)%n_distinct = substats(isubvolume)%n_distinct+count(sam_replica>0)
          substats(isubvolume)%n_replica_max = max(substats(isubvolume)%n_replica_max,maxval(sam_replica))
-         !$OMP END CRITICAL
          
          deallocate(sam_replica)
          
       end if
       
    end do ! task
-   !$OMP END DO
-   !$OMP END PARALLEL
    
    totstats%n_distinct = sum(substats%n_distinct)
    totstats%n_replica_max = maxval(substats%n_replica_max)
