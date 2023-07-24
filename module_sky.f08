@@ -135,7 +135,6 @@ subroutine make_sky
          !$OMP DO
          do itile = 1,size(tile)
             if ((snapshot(isnapshot)%dmax>=tile(itile)%dmin).and.(snapshot(isnapshot)%dmin<=tile(itile)%dmax)) then
-               call out('Looking at snapshot ',isnapshot,', subvolume ', isubvolume)
          
                allocate(sam_replica_tile(size(sam)))
                sam_replica_tile = 0
