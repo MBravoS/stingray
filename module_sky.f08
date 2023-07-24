@@ -111,8 +111,6 @@ subroutine make_sky
        
    i_stamps = 0
    
-   call out('POSITION OBJECTS INTO SKY AND MAKE APPARENT PROPERTIES')
-   
    !$ call OMP_set_nested(.true.) ! enables nested parallelism
    
    !$OMP PARALLEL PRIVATE(isnapshot,isubvolume,itile,sam,sam_sel,sam_replica)
@@ -137,6 +135,8 @@ subroutine make_sky
          !$OMP DO
          do itile = 1,size(tile)
             if ((snapshot(isnapshot)%dmax>=tile(itile)%dmin).and.(snapshot(isnapshot)%dmin<=tile(itile)%dmax)) then
+               write(str,fmt) trim(strt),': Looking at snapshot ',isnapshot,', subvolume ', isubvolume
+               call out(trim(str))
          
                allocate(sam_replica_tile(size(sam)))
                sam_replica_tile = 0
