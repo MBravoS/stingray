@@ -670,6 +670,10 @@ subroutine make_auto_parameters
    end do
    call set_auto_parameter('subvolume_max',isubvolume-1)
    
+   ! TEST
+   filename = filename_sam(snapshot_max,isubvolume-1,1)
+   call out('File of last snapshot and subvolume: '//trim(filename))
+   
    ! other parameters
    filename = filename_sam(snapshot_min,0,1)
    call out('File of automatic parameters: '//trim(filename))
