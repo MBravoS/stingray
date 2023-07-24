@@ -111,6 +111,8 @@ subroutine make_sky
        
    i_stamps = 0
    
+   call tic('POSITION OBJECTS INTO SKY AND MAKE APPARENT PROPERTIES')
+   
    !$ call OMP_set_nested(.true.) ! enables nested parallelism
    
    !$OMP PARALLEL PRIVATE(isnapshot,isubvolume,itile,sam,sam_sel,sam_replica)
