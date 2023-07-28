@@ -139,7 +139,7 @@ subroutine selection_gama(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,1750.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.7)
+      range%dc = (/0.0,2450.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.6)
       range%ra = (/129.0,351.0/)    ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-35.0,3.0/)     ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
@@ -158,9 +158,9 @@ subroutine selection_gama(pos,sam,sky,range,selected)
       mstars = (sam%mstars_disk+sam%mstars_bulge)/para%h ! [Msun]
       dl = pos%dc/para%h ! [Mph] comoving distance as an inferior limit for the luminosity distance, which would require sky%zobs
       mag = convert_absmag2appmag(convert_stellarmass2absmag(mstars,1.0),dl)
-      selected = mag<=19.8+dmag
+      selected = mag<=19.65+dmag
    case (select_by_all)
-      selected = sky%mag<=19.8+dmag
+      selected = sky%mag<=19.65+dmag
    end select
    
 end subroutine
@@ -188,7 +188,7 @@ subroutine selection_devils(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,2600.00/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
+      range%dc = (/0.0,4000.00/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
       range%ra = (/34.0,150.70/) ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-28.5,2.79/) ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
@@ -227,7 +227,7 @@ subroutine selection_waves_wide(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,2600.0/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
+      range%dc = (/0.0,1250.0/) ! [simulation length units, here Mpc/h] distance range (to z~0.3)
       range%ra = (/0.0,360.0/)  ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-40.0,5.0/) ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
@@ -266,7 +266,7 @@ subroutine selection_waves_deep(pos,sam,sky,range,selected)
    ! selection function
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
-      range%dc = (/0.0,1100.0/) ! [simulation length units, here Mpc/h] distance range (to z~0.4)
+      range%dc = (/0.0,4000.0/) ! [simulation length units, here Mpc/h] distance range (to z~1.2)
       range%ra = (/-21.0,151.12/) ! [deg] range of right ascensions, bound to 0 to 360
       range%dec = (/-44.7,3.5/) ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
