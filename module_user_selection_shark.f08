@@ -289,4 +289,49 @@ end subroutine
 
 ! **********************************************************************************************************************************
 
+! DESI-BGS survey
+
+subroutine selection_desi_bgs(pos,sam,sky,range,selected)
+
+   implicit none
+   type(type_spherical),intent(in),optional     :: pos
+   type(type_sam),intent(in),optional           :: sam
+   type(type_sky_galaxy),intent(in),optional    :: sky
+   type(type_fov),intent(inout),optional        :: range
+   logical,intent(inout),optional               :: selected
+   
+   ! computation variables
+   real*4            :: mstars ! [Msun] stellar mass
+   real*4            :: dl ! [Mpc] comoving distance
+   real*4            :: mag ! generic apparent magnitude assuming M/L=1
+   real*4,parameter  :: dmag = 4.0 ! magnitude tolerance
+   
+   ! selection function
+   select case (selection_type(pos,sam,sky,range,selected))
+   case (return_position_range)
+      range%dc = (/0.0,2450.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.6)
+      range%ra = (/175.0,215.0/)    ! [deg] range of right ascensions, bound to 0 to 360
+      range%dec = (/15.0,55.0/)     ! [deg] range of declinations, bound to -90 to +90
+   case (select_by_pos)
+      selected = ((pos%ra>=175.0).and.(pos%ra<=215.0).and.(pos%dec>=15.00).and.(pos%dec<=55.00))       ! ~1300 deg^2
+   case (select_by_sam)
+      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
+   case (select_by_pos_and_sam)
+      ! note: The selection below is based on a rough estimate of a generic apparent magnitude mag.
+      !       This same magnitude is computed later and stored in sky%mag, which is used onder 'selected_by_all'.
+      !       The point of pre-computing the magnitude here, using the comoving distance as an
+      !       inferior limit for the luminosity distance, is to accelerate the computation by avoiding time-consuming
+      !       computations of many apparent galaxy properties
+      mstars = (sam%mstars_disk+sam%mstars_bulge)/para%h ! [Msun]
+      dl = pos%dc/para%h ! [Mph] comoving distance as an inferior limit for the luminosity distance, which would require sky%zobs
+      mag = convert_absmag2appmag(convert_stellarmass2absmag(mstars,1.0),dl)
+      selected = mag<=20+dmag
+   case (select_by_all)
+      selected = sky%mag<=20+dmag
+   end select
+   
+end subroutine
+
+! **********************************************************************************************************************************
+
 end module module_user_selection
