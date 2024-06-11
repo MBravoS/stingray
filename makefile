@@ -22,7 +22,7 @@ ifeq ($(system),personal) # private laptop of developer Obreschkow
 else ifeq ($(system),hyades) # in-house cluster at ICRAR/UWA
    LFLAGS = -I${BLDR_HDF5_INCLUDE_PATH} -L${BLDR_HDF5_LIB_PATH} -lhdf5_fortran -lhdf5
 else ifeq ($(system),setonix) # main cluster at Pawsey
-   LFLAGS = -I/software/setonix/2023.08/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.12.2-oaojh265x56ohdfcct3yyojx7beb5rqp/include -L/software/setonix/2023.08/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.12.2-oaojh265x56ohdfcct3yyojx7beb5rqp/lib -lhdf5_fortran -lhdf5
+   LFLAGS = -I/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.14.3-bpeeyhf5qey2hpmophdfb4vzcc7uj57i/include -L/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.14.3-bpeeyhf5qey2hpmophdfb4vzcc7uj57i/lib -lhdf5_fortran -lhdf5
 else
    $(info ERROR unknown system: '${system}')
 stop
