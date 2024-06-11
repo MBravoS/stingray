@@ -311,10 +311,10 @@ subroutine selection_desi_bgs(pos,sam,sky,range,selected)
    select case (selection_type(pos,sam,sky,range,selected))
    case (return_position_range)
       range%dc = (/0.0,2450.0/)     ! [simulation length units, here Mpc/h] distance range (to z~0.6)
-      range%ra = (/175.0,215.0/)    ! [deg] range of right ascensions, bound to 0 to 360
-      range%dec = (/15.0,55.0/)     ! [deg] range of declinations, bound to -90 to +90
+      range%ra = (/120.0,260.0/)    ! [deg] range of right ascensions, bound to 0 to 360
+      range%dec = (/-10.0,80.0/)     ! [deg] range of declinations, bound to -90 to +90
    case (select_by_pos)
-      selected = ((pos%ra>=175.0).and.(pos%ra<=215.0).and.(pos%dec>=15.00).and.(pos%dec<=55.00))       ! ~1300 deg^2
+      selected = ((pos%ra>=120.0).and.(pos%ra<=260.0).and.(pos%dec>=-10.00).and.(pos%dec<=80.00))       ! ~9300 deg^2
    case (select_by_sam)
       selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e7
    case (select_by_pos_and_sam)
