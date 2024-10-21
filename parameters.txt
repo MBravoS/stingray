@@ -113,7 +113,7 @@ options
 make_groups             y              logical flag specifying if groups are produced
 
 # Output file options
-merge_output            y              logical flag specifying whether the output file should be merged, or left split by subvolume
+merge_output            y              logical flag specifying whether the output file should be merged or left split by subvolume
 keep_tmp                n              logical flag specifying if the temporary binary output files are kept, if run was successful
 keep_log                y              logical flag specifying if the logfile is kept, if run was successful
 
@@ -135,6 +135,7 @@ seed                    1
 randomisation           tiles
 filename_sky            mocksky_dsa_wide_1
 options                 luminosities,line_shapes
+merge_output            n
 end
 
 parameterset dsa-pulsar-mac
@@ -335,7 +336,7 @@ parameterset dev1a
 options                 
 survey                  dev1
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev1a
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev1a
 subvolume_max           0
 randomisation           single
 translate               n
@@ -349,7 +350,7 @@ parameterset dev1b
 options                 
 survey                  dev1
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev1b
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev1b
 subvolume_max           0
 randomisation           single
 seed                    4
@@ -360,7 +361,7 @@ parameterset dev1c (used only by core-developers)
 options                 
 survey                  dev1
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev1c
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev1c
 subvolume_max           0
 randomisation           tiles
 seed                    1
@@ -371,7 +372,7 @@ parameterset dev1d
 options                 
 survey                  dev1
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev1d
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev1d
 shell_tweaking          n
 subvolume_max           0
 randomisation           shells
@@ -388,7 +389,7 @@ parameterset dev1e
 options                 
 survey                  dev1
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev1e
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev1e
 subvolume_max           0
 randomisation           shells
 shell_tweaking          y
@@ -404,7 +405,7 @@ parameterset dev2a
 options                 
 survey                  dev2
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev2a              
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev2a              
 subvolume_max           0
 snapshot_min            199  to ensure that galaxies do not move
 randomisation           single
@@ -418,7 +419,7 @@ parameterset dev2b
 options                 
 survey                  dev2
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev2b           
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev2b           
 subvolume_max           0
 snapshot_min            199  to ensure that galaxies do not move
 randomisation           single
@@ -429,7 +430,7 @@ parameterset dev2c
 options                 
 survey                  dev2
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev2c              
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev2c              
 subvolume_max           0
 snapshot_min            199  to ensure that galaxies do not move
 randomisation           tiles
@@ -440,7 +441,7 @@ parameterset dev2d
 options                 
 survey                  dev2
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev2d           
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev2d           
 subvolume_max           0
 snapshot_min            199  to ensure that galaxies do not move
 randomisation           shells
@@ -452,7 +453,7 @@ parameterset dev2e
 options                 
 survey                  dev2
 path_input              /Users/do/Data/SURFS/L210_N1536/shark/Shark-TreeFixed-ReincPSO-kappa0p002/
-path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/dev2e              
+path_output             /Users/do/Dropbox/Code/Fortran/stingray/tests/shark2/dev2e              
 subvolume_max           0
 snapshot_min            199  to ensure that galaxies do not move
 randomisation           shells

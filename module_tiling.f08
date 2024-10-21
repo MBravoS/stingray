@@ -127,7 +127,7 @@ subroutine make_distance_ranges
          snapshot(i)%dmin = 0.5*(d(i+1)+d(i))
       end if
       if (i==para%snapshot_min) then
-         snapshot(i)%dmax = 9999.0
+         snapshot(i)%dmax = huge(0.0_4)
       else
          snapshot(i)%dmax = 0.5*(d(i)+d(i-1))
       end if

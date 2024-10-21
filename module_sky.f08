@@ -58,7 +58,7 @@ subroutine make_sky
    type(type_task),allocatable         :: task(:)
    type(type_skystats),allocatable     :: substats(:) ! statistics of mock sky for particular subvolumes
    type(type_skystats)                 :: totstats    ! statistics of total mock sky
-   integer*4                           :: itask,n_tasks,n_stamps,i_stamps
+   integer*4                           :: itask,n_tasks,n_stamps,i_stamps,stamp_id
    
    call tic('POSITION OBJECTS INTO SKY AND MAKE APPARENT PROPERTIES')
    
@@ -131,14 +131,15 @@ subroutine make_sky
          allocate(sam_replica(size(sam)))
          sam_replica = 0
          
-         !$OMP PARALLEL PRIVATE(sam_replica_tile,sky_galaxy,sky_group,filename,str,strt)
+         !$OMP PARALLEL PRIVATE(sam_replica_tile,sky_galaxy,sky_group,filename,str,strt,stamp_id)
          !$OMP DO
          do itile = 1,size(tile)
             if ((snapshot(isnapshot)%dmax>=tile(itile)%dmin).and.(snapshot(isnapshot)%dmin<=tile(itile)%dmax)) then
          
                allocate(sam_replica_tile(size(sam)))
                sam_replica_tile = 0
-               call place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_replica_tile,sky_galaxy,sky_group)
+               stamp_id = size(tile)*itask+itile ! unique, independent of threading
+               call place_subvolume_into_tile(stamp_id,itile,isnapshot,isubvolume,sam,sam_sel,sam_replica_tile,sky_galaxy,sky_group)
                
                !$OMP CRITICAL 
                ! count objects, one thread at a time
@@ -255,7 +256,6 @@ subroutine preprocess_snapshot(sam,sam_sel)
    integer*4,allocatable                     :: index(:)
    integer*4                                 :: i,n
    integer*4                                 :: n_groups
-   integer*4                                 :: i_group
    integer*8                                 :: groupid
    integer*4                                 :: n_galaxies_in_group
    logical*4                                 :: group_selected
@@ -266,6 +266,18 @@ subroutine preprocess_snapshot(sam,sam_sel)
    
    if (para%make_groups) then
    
+      ! order galaxies by group id, such that central galaxies come first (if it exists)
+      allocate(id(n),index(n))
+      do i = 1,n
+         id(i) = sam(i)%get_groupid()*2
+         if (sam(i)%is_group_center()) then
+            id(i)=id(i)-1 ! to make sure that this galaxy gets listed first
+         end if
+      end do
+      call sort(id,index)
+      sam = sam(index)
+      deallocate(id,index)
+      
       ! determine if the objects pass the SAM selection
       if (allocated(sam_sel)) deallocate(sam_sel)
       allocate(sam_sel(n))
@@ -273,37 +285,25 @@ subroutine preprocess_snapshot(sam,sam_sel)
          sam_sel(i) = .true.
          call selection_function(sam=sam(i),selected=sam_sel(i))
       end do
-   
-      ! order galaxies by group id, such that central galaxies come first
-      allocate(id(n),index(n))
-      n_groups = 0
-      do i = 1,n
-         id(i) = sam(i)%get_groupid()*2+1
-         if (sam(i)%is_group_center()) then
-            id(i)=id(i)-1 ! to make sure that this galaxy gets listed first
-            n_groups = n_groups+1
-         end if
-      end do
-      call sort(id,index)
-      sam = sam(index)
-      sam_sel = sam_sel(index)
-      
+            
       ! keep all galaxies of groups, where at least one object is sam-selected; reject all other galaxies
+      allocate(index(n))
+      n_groups = 0
       n_keep = 0
       i = 1
-      do i_group = 1,n_groups
+      do while (i<=n)
       
-         ! handle central galaxy
-         if (.not.sam(i)%is_group_center()) call error('each group must have exactly one central member.')
-         groupid = sam(i)%get_groupid() ! identical to sam(i)%get_groupid(), but faster
+         ! start new group
+         n_groups = n_groups+1
+         groupid = sam(i)%get_groupid()
          
          ! count number of galaxies in group and number of selected galaxies in group
-         n_galaxies_in_group = 1
-         group_selected = sam_sel(i)
-         index(n_keep+n_galaxies_in_group) = i
-         i = i+1
+         group_selected = .false.
+         n_galaxies_in_group = 0
          do while (i<=n.and.sam(min(i,n))%get_groupid()==groupid)
-            if (sam(i)%is_group_center()) call error('each group must have exactly one central member.')
+            if (n_galaxies_in_group>0) then
+               if (sam(i)%is_group_center()) call error('each group can have at most one central object.')
+            end if
             n_galaxies_in_group = n_galaxies_in_group+1
             group_selected = group_selected.or.sam_sel(i)
             index(n_keep+n_galaxies_in_group) = i
@@ -320,6 +320,7 @@ subroutine preprocess_snapshot(sam,sam_sel)
       ! apply reordering and selection to arrays sam(:) and sam_sel(:)
       sam = sam(index(1:n_keep))
       sam_sel = sam_sel(index(1:n_keep))
+      deallocate(index)
       
    else
    
@@ -342,13 +343,14 @@ subroutine preprocess_snapshot(sam,sam_sel)
    
 end subroutine preprocess_snapshot
 
-subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_replica,sky_galaxy_list,sky_group_list)
+subroutine place_subvolume_into_tile(stamp_index,itile,isnapshot,isubvolume,sam,sam_sel,sam_replica,sky_galaxy_list,sky_group_list)
 
    ! NB: most of this routine deals with groups
-   ! if no make_groups==0, this routine essentially places all the galaxies in 'sam' into the sky,
+   ! if make_groups==0, this routine essentially places all the galaxies in 'sam' into the sky,
    ! making sure to only retain the objects that pass the selection_function of the user module
 
    implicit none
+   integer*4,intent(in)                            :: stamp_index
    integer*4,intent(in)                            :: itile
    integer*4,intent(in)                            :: isnapshot
    integer*4,intent(in)                            :: isubvolume
@@ -406,7 +408,9 @@ subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_
    ishell = tile(itile)%shell
    n_galaxies = 0
    n_groups = 0
-   prefixid = int(limit%n_galaxies_per_tile_max,8)*(int(limit%n_subvolumes_max,8)*int(isnapshot,8)+int(isubvolume,8))
+   !prefixid = int(limit%n_galaxies_per_tile_max,8)*(int(limit%n_subvolumes_max,8)*int(isnapshot,8)+int(isubvolume,8)) ! up to v0.37
+   prefixid = int(limit%n_galaxies_per_tile_max,8)*int(stamp_index,8)
+   
    devoption_yzgrid = devoption('yzgrid')
    wrap_groups = trim(para%randomisation)=='tiles'
    
@@ -467,11 +471,11 @@ subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_
          if (.not.devoption_yzgrid) call error('group wider than box side times ',limit%group_diameter_max)
       end if
       if (dx>0.5) then ! group is wrapped
-         if (wrap_groups) then
+         if (wrap_groups) then ! leave group wrapped, but flag
             group%is_at_edge_of%tile = .true.
-         else
+         else ! unwrap group
             group%is_at_edge_of%tile = .false.
-            ! translate all members to side of central, by allowing to step outside the box boundary
+            ! translate all members to side of the first galaxy in the group (which is the central if it exists)
             do d = 1,3
                xtile(:,d) = modulo(xtile(:,d)+0.5,1.0)+xtile(1,d)-modulo(xtile(1,d)+0.5,1.0)
             end do
@@ -535,7 +539,7 @@ subroutine place_subvolume_into_tile(itile,isnapshot,isubvolume,sam,sam_sel,sam_
    
          ! save some properties for group
          sky_galaxy_selected(k) = selected
-         if (k==1) group%central_galaxy_base = base
+         if (k==1) group%central_galaxy_base = base ! base-data of first galaxy, which is the group's central (if it exists)
          
       end do
    
