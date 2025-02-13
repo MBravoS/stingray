@@ -48,14 +48,10 @@ subroutine assign_selection_function
       case('example');              selection_function => selection_example
       case('gama');                 selection_function => selection_gama
       case('devils');               selection_function => selection_devils
-      case('waves-g23');            selection_function => selection_waves_g23
+      case('waves-wide');           selection_function => selection_waves_wide
+      case('waves-deep');           selection_function => selection_waves_deep
+      case('desi-bgs');             selection_function => selection_desi_bgs
       case('deep-optical');         selection_function => selection_deep_optical
-      case('deep-optical_narrow');  selection_function => selection_deep_optical_narrow
-      case('wallaby-micro');        selection_function => selection_wallaby_micro
-      case('wallaby-medi');         selection_function => selection_wallaby_medi
-      case('dsa-wide');             selection_function => selection_dsa_wide
-      case('dsa-pulsar');           selection_function => selection_dsa_pulsar
-      case('dsa-deep');             selection_function => selection_dsa_deep
    case default
       call selection_function_unknown
    end select   
@@ -338,42 +334,6 @@ subroutine selection_desi_bgs(pos,sam,sky,range,selected)
       selected = mag<=20+dmag
    case (select_by_all)
       selected = sky%mag<=20+dmag
-   end select
-   
-end subroutine
-
-! **********************************************************************************************************************************
-
-! WAVES G23 survey
-
-subroutine selection_waves_g23(pos,sam,sky,range,selected)
-
-   implicit none
-   type(type_spherical),intent(in),optional     :: pos
-   type(type_sam),intent(in),optional           :: sam
-   type(type_sky_galaxy),intent(in),optional    :: sky
-   type(type_fov),intent(inout),optional        :: range
-   logical,intent(inout),optional               :: selected
-   
-   ! computation variables
-   real*4            :: mag ! rough estimate of a apparent magnitude assuming M/L=1
-   real*4,parameter  :: dmag = 4.0 ! magnitude tolerance
-   
-   ! selection function
-   select case (selection_type(pos,sam,sky,range,selected))
-   case (return_position_range)
-      range%dc = (/0.0,2350.0/) ! [simulation length units, here Mpc/h]
-      range%ra = (/339.0,351.0/) ! [deg] range of right ascensions, bound to 0 to 360
-      range%dec = (/-35.0,-30.0/) ! [deg] range of declinations, bound to -90 to +90
-   case (select_by_pos)
-   case (select_by_sam)
-      selected = (sam%mstars_disk+sam%mstars_bulge)/para%h>1e6
-   case (select_by_pos_and_sam)
-      ! note: see comments in selection_gama
-      mag = convert_absmag2appmag(convert_stellarmass2absmag((sam%mstars_disk+sam%mstars_bulge)/para%h,1.0),pos%dc/para%h)
-      selected = mag<=24.0+dmag
-   case (select_by_all)
-      selected = sky%mag<=24.0+dmag
    end select
    
 end subroutine
