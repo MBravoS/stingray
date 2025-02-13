@@ -22,6 +22,8 @@ ifeq ($(system),default)
    LFLAGS = -I${HDF5_DIR}/include -L${HDF5_DIR}/lib -lhdf5_fortran -lhdf5
 else ifeq ($(system),hyades) # ICRAR-Hyades
    LFLAGS = -I${BLDR_HDF5_INCLUDE_PATH} -L${BLDR_HDF5_LIB_PATH} -lhdf5_fortran -lhdf5
+else ifeq ($(system),setonix) # main cluster at Pawsey
+   LFLAGS = -I/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.14.3-bpeeyhf5qey2hpmophdfb4vzcc7uj57i/include -L/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/hdf5-1.14.3-bpeeyhf5qey2hpmophdfb4vzcc7uj57i/lib -lhdf5_fortran -lhdf5
 else
    $(error ERROR: unknown system '$(system)')
 endif
